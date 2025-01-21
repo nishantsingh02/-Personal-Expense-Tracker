@@ -1,0 +1,20 @@
+{
+  "name": "fintech-assessment",
+  "version": "1.0.0",
+  "description": "Fintech Assessment Project - Full Stack Application",
+  "scripts": {
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "client": "cd client && npm start",
+    "server": "cd server && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "cd server && npm test && cd ../client && npm test",
+    "migrate": "cd server && npm run migrate",
+    "migrate:rollback": "cd server && npm run migrate:rollback",
+    "migrate:reset": "cd server && npm run migrate:reset",
+    "seed": "cd server && npm run seed",
+    "db:setup": "npm run migrate && npm run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
