@@ -1,11 +1,11 @@
-# Fintech Assessment Project
+# Personal Expense Tracker Project
 
 ## Overview
-This project is a full-stack financial dashboard application that provides budget tracking and financial analysis capabilities.
+This project is a full-stack Personal Expense Tracker that provides personal budget tracking and financial analysis capabilities.
 
 ## Project Structure
 - `client/`: React.js frontend application
-- `server/`: Node.js backend application with SQLite database
+- `server/`: Node.js backend application with Postgresql database
 
 ## Getting Started
 
@@ -25,16 +25,12 @@ This project is a full-stack financial dashboard application that provides budge
    ```bash
    npm run dev
    ```
-2. Access the application at `http://localhost:3000`
+2. Access the Frontend application at `http://localhost:3000`
+3. Access the Backend  application at `http://localhost:5000`
 
 ## Features
 - Budget tracking dashboard
 - Category-wise spending analysis
 - Transaction management
-- Refund processing
 
-## Testing
-Run tests for both frontend and backend:
-```bash
-npm test
-```
+

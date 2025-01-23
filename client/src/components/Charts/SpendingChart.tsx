@@ -1,41 +1,56 @@
-import React from "react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie } from "react-chartjs-2";
-import { SpendingByCategory } from "../../types";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface ChartData {
-  labels: string[];
-  datasets: {
-    data: number[];
-    backgroundColor: string[];
-  }[];
+interface Transaction {
+  id: string;
+  category: string;
+  amount: number;
+  date: string;
 }
 
 const SpendingChart: React.FC = () => {
-  const dummyData: SpendingByCategory[] = [
-    { category: "Food", amount: 300, transactionCount: 5 },
-    { category: "Transport", amount: 200, transactionCount: 8 },
-    { category: "Entertainment", amount: 150, transactionCount: 3 },
-    { category: "Bills", amount: 400, transactionCount: 4 },
-    { category: "Shopping", amount: 250, transactionCount: 6 },
-  ];
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const chartData: ChartData = {
-    labels: dummyData.map((item) => item.category),
-    datasets: [
-      {
-        data: dummyData.map((item) => item.amount),
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-        ],
-      },
-    ],
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/transactions");
+        setTransactions(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch transactions');
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!transactions.length) return <div>No Transaction Found !</div> 
+
+  const categoryTotals = transactions.reduce((acc, transaction) => {
+    acc[transaction.category] = 
+      (acc[transaction.category] || 0) + transaction.amount;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const chartData = {
+    labels: Object.keys(categoryTotals),
+    datasets: [{
+      data: Object.values(categoryTotals),
+      backgroundColor: [
+        "#FF6384", "#36A2EB", "#FFCE56", 
+        "#4BC0C0", "#9966FF", "#FF9F40"
+      ],
+    }],
   };
 
   return (
@@ -46,9 +61,7 @@ const SpendingChart: React.FC = () => {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: "bottom",
-            },
+            legend: { position: "bottom" },
           },
         }}
       />

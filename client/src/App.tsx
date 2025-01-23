@@ -10,7 +10,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen bg-gray-50">
-          <Dashboard />
+          <Dashboard /> {/* Dashboard Interface*/}
         </div>
       </Router>
     </QueryClientProvider>

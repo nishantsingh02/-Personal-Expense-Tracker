@@ -5,7 +5,7 @@ import Dashboard from "./components/Dashboard";
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Dashboard />} /> {/* dashboard route*/}
     </Routes>
   );
 };

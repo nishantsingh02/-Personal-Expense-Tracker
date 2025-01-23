@@ -1,15 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { CrossIcon } from "./Icons/CrossIcon";
 import { Button } from "./Icons/Button";
 import { Input } from "./Icons/Input";
-import { useRef } from "react";
-
-//import { BACKEND_URL } from "../config";
-
-enum ContentType {
-  Youtube = "youtube",
-  Twitter = "twitter",
-}
+import axios from "axios";
+import Calender from "./Calender";
+import AddCategory from "./Category";
 
 interface CreateContentModelProps {
   open: boolean;
@@ -19,47 +14,58 @@ interface CreateContentModelProps {
 export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
-  const [type, setType] = useState("youtube");
-  const [error, setError] = useState<string | null>(null); // Added error state
-/*
-  async function addContent() {
-    const title = titleRef.current?.value;
-    const link = linkRef.current?.value;
+  const [error, setError] = useState<string | null>(null);
 
-    if (!title || !link) {
-      setError("Title and Link are required."); // Error for missing fields
+  // State to manage selected date and category
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  const addContent = async () => {
+    const name = titleRef.current?.value; // Name field (formerly 'title')
+    const amount = linkRef.current?.value; // Amount field
+    const date = selectedDate; // Use selected date from Calender
+    const category = selectedCategory; // Get the selected category
+
+    // Log the payload for debugging purposes
+    console.log("Request Payload:", { name, amount, date, category });
+
+    if (!name || !amount || !category || !date) {
+      setError("All fields are required");
       return;
     }
-  
 
     try {
-      // Send POST request to create content
-      await axios.post(
-        `${BACKEND_URL}/content`,
-        {
-          link,
-          title,
-          type,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Updated to include Bearer prefix
-          },
-        }
-      );
+      // Sends POST request using Axios to the backend
+      const response = await axios.post("http://localhost:5000/api/content", {
+        name, // description of the expense
+        amount: parseFloat(amount), // Sends the amount as a number
+        date: selectedDate, // Send selected date
+        category: selectedCategory, // Send selected category
+      });
 
-      setError(null); // Clear any previous errors
-      onClose(); // Close the model after successful submission
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Error creating content:", error.message);
-      } else {
-        console.error("Error creating content:", error);
+      
+      if (response.status === 201) {
+        console.log("Content created successfully:", response.data);
+        setError(null); 
+        onClose(); // Close the form on success
+
+        // Reset form fields after successful submission
+        titleRef.current!.value = "";
+        linkRef.current!.value = "";
+        setSelectedDate(null);
+        setSelectedCategory("");
       }
-      setError("Failed to create content. Please check your inputs or token.");
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Error creating content:", error.response.data);
+        setError(error.response.data.error || "Failed to create content.");
+      } else {
+        console.error("Error creating content:", error.message);
+        setError("Failed to create content. Please try again.");
+      }
     }
-  }
-*/
+  };
+
   return (
     <div>
       {open && (
@@ -73,35 +79,22 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
                 </div>
               </div>
               <div>
-                <Input reference={titleRef} placeholder={"Title"} />
+                <Input reference={titleRef} placeholder={"Name"} /> 
                 <Input reference={linkRef} placeholder={"Amount"} />
-                {error && <p className="text-red-500">{error}</p>} {/* Display error message */}
+                {error && <p className="text-red-500">{error}</p>}
                 <div>
                   <h1>Date</h1>
-                  <div className="flex p-4 gap-2 justify-center">
-                    <Button
-                      text="Yesterday"
-                      variant={type === ContentType.Youtube ? "primary" : "secondary"}
-                      onClick={() => {
-                        setType(ContentType.Youtube);
-                      }}
-                    ></Button>
-                    <Button
-                      text="Tomorrow"
-                      variant={type === ContentType.Twitter ? "primary" : "secondary"}
-                      onClick={() => {
-                        setType(ContentType.Twitter);
-                      }}
-                    ></Button>
-                  </div>
+                  <Calender onChange={(date: Date) => setSelectedDate(date)} />
+                    <br />
+                  <AddCategory onChange={(category: string) => setSelectedCategory(category)} />
+                  <br />
                 </div>
               </div>
               <div className="flex justify-center">
-                <Button /*onClick={}*/ variant="primary" text="Submit" />
+                <Button onClick={addContent} variant="primary" text="Submit" />
               </div>
             </span>
           </div>
-          <div className="flex flex-col justify-center md:flex flex-row justify-center"></div>
         </div>
       )}
     </div>
