@@ -25,7 +25,7 @@ The Personal Expense Tracker provides a user-friendly interface and robust funct
 Overall, this project is an excellent tool for anyone looking to improve their financial management skills and achieve their financial goals.
 
 ## Note for the reader
-While I have integrated most of the points mentioned in the email to build this project , But if there something missing or anything that should be to considered do let me know. I am always open for Feedback which can help me to work in the right direction.
-Thanks for providing me the oppourtunity to work on this great project, Hope you liked my work
+While I have integrated most of the points mentioned in the email to build this project , But if there is something missing or anything that should be to considered do let me know. I am always open for Feedback which helps me to work in the right direction.
+Thanks for providing me the opportunity to work on this great project, Hope you liked my work
 Have a good day !
 

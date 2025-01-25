@@ -10,7 +10,7 @@ app.use(express.json());
 // Use the expense route
 app.use("/api", expenseRoutes);
 
-const prisma = new PrismaClient;
+const prisma = new PrismaClient();
 
 (async () => {
   try {

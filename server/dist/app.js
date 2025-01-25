@@ -21,7 +21,7 @@ app.use((0, cors_1.default)({ origin: ["https://personal-expense-tracker-kohl.ve
 app.use(express_1.default.json());
 // Use the expense route
 app.use("/api", expenseRoutes_1.default);
-const prisma = new client_1.PrismaClient;
+const prisma = new client_1.PrismaClient();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield prisma.$connect();
