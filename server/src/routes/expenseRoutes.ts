@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from 'express';
 import { createExpense } from "../controllers/expenseController";
 import { PrismaClient } from "@prisma/client";
 
@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 
 // Routes to get all expenses (transactions)
-router.get("/transactions", async (req, res) => {
+router.get("/transactions", async (req:Request, res:Response) => {
   try {
     const transactions = await prisma.expenses.findMany(); // Fetchs all transactions from the expenses table
     res.status(200).json(transactions); // Sends the transactions back to the frontend
