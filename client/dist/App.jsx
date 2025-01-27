@@ -12,7 +12,7 @@ function App() {
     return (<react_query_1.QueryClientProvider client={queryClient}>
       <react_router_dom_1.BrowserRouter>
         <div className="min-h-screen bg-gray-50">
-          <Dashboard_1.default />
+          <Dashboard_1.default /> {/* Dashboard Interface*/}
         </div>
       </react_router_dom_1.BrowserRouter>
     </react_query_1.QueryClientProvider>);

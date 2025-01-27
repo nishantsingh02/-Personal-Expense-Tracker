@@ -4,6 +4,7 @@ import  { Button }  from '../Icons/Button';
 import { Plusicon} from '../Icons/Plusicon';
 import { CreateContentModel } from '../CreateContentModel';
 import axios from "axios";
+const Backend_url = process.env.REACT_APP_BACKEND_URL;
 
 interface Transaction {
   id: number;
@@ -22,7 +23,7 @@ const Dashboard: React.FC = () => {
      useEffect(() => {
        const fetchTransactions = async () => {
          try {
-           const response = await axios.get("http://localhost:5000/api/transactions");
+           const response = await axios.get(`${Backend_url}/api/transactions`);
            setTransactions(response.data); // Set the transactions data from the backend
          } catch (err) {
            console.error("Error fetching transactions:", err);

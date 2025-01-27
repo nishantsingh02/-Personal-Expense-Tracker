@@ -8,7 +8,7 @@ const react_router_dom_1 = require("react-router-dom");
 const Dashboard_1 = __importDefault(require("./components/Dashboard"));
 const AppRoutes = () => {
     return (<react_router_dom_1.Routes>
-      <react_router_dom_1.Route path="/" element={<Dashboard_1.default />}/>
+      <react_router_dom_1.Route path="/" element={<Dashboard_1.default />}/> {/* dashboard route*/}
     </react_router_dom_1.Routes>);
 };
 exports.default = AppRoutes;

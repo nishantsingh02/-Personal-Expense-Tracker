@@ -5,6 +5,7 @@ import { Input } from "./Icons/Input";
 import axios from "axios";
 import Calender from "./Calender";
 import AddCategory from "./Category";
+const Backend_url = process.env.REACT_APP_BACKEND_URL;
 
 interface CreateContentModelProps {
   open: boolean;
@@ -36,7 +37,7 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
 
     try {
       // Sends POST request using Axios to the backend
-      const response = await axios.post("http://localhost:5000/api/content", {
+      const response = await axios.post(`${Backend_url}/api/content`, {
         name, // description of the expense
         amount: parseFloat(amount), // Sends the amount as a number
         date: selectedDate, // Send selected date

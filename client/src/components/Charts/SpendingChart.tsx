@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
+const Backend_url = process.env.REACT_APP_BACKEND_URL;
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Transaction {
@@ -20,7 +21,7 @@ const SpendingChart: React.FC = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/transactions");
+        const response = await axios.get(`${Backend_url}/api/transactions`);
         setTransactions(response.data);
         setLoading(false);
       } catch (err) {
@@ -30,7 +31,7 @@ const SpendingChart: React.FC = () => {
     };
 
     fetchTransactions();
-  }, []);
+  }, []); 
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
