@@ -41,7 +41,6 @@ const Button_1 = require("../Icons/Button");
 const Plusicon_1 = require("../Icons/Plusicon");
 const CreateContentModel_1 = require("../CreateContentModel");
 const axios_1 = __importDefault(require("axios"));
-const Backend_url = process.env.REACT_APP_BACKEND_URL;
 const Dashboard = () => {
     const [modelOpen, setModelOpen] = react_1.default.useState(false);
     const [transactions, setTransactions] = (0, react_1.useState)([]);
@@ -50,7 +49,7 @@ const Dashboard = () => {
     (0, react_1.useEffect)(() => {
         const fetchTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
             try {
-                const response = yield axios_1.default.get(`${Backend_url}/api/transactions`);
+                const response = yield axios_1.default.get("https://personal-expense-tracker-1wzx.onrender.com/api/transactions");
                 setTransactions(response.data); // Set the transactions data from the backend
             }
             catch (err) {

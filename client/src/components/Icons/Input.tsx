@@ -1,12 +1,16 @@
-
 interface InputProps {
+    reference: React.RefObject<HTMLInputElement>;
     placeholder: string;
-    reference: React.RefObject<HTMLInputElement>
+    className?: string;  // Make className optional
 }
 
-
-export function Input ({placeholder, reference}: InputProps) {
-    return <div>
-        <input ref={reference} placeholder={placeholder} type={"text"} className="px-4 py-2 m-2"></input>
-    </div>
-}
+export const Input: React.FC<InputProps> = ({ reference, placeholder, className }) => {
+    return (
+        <input
+            ref={reference}
+            type="text"
+            placeholder={placeholder}
+            className={`rounded-lg border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${className || ''}`}
+        />
+    );
+};

@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import expenseRoutes from "./routes/expenseRoutes";
 
 const app = express();
-const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app"];
+const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app","http://localhost:3000"];
 
 app.use(
   cors({

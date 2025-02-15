@@ -16,19 +16,14 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // State to manage selected date and category
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const addContent = async () => {
-    const name = titleRef.current?.value; // Name field (formerly 'title')
-    const amount = linkRef.current?.value; // Amount field
-    const date = selectedDate; // Use selected date from Calender
-    const category = selectedCategory; // Get the selected category
-
-    // Log the payload for debugging purposes
-    console.log("Request Payload:", { name, amount, date, category });
+    const name = titleRef.current?.value;
+    const amount = linkRef.current?.value;
+    const date = selectedDate;
+    const category = selectedCategory;
 
     if (!name || !amount || !category || !date) {
       setError("All fields are required");
@@ -36,68 +31,123 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     }
 
     try {
-      // Sends POST request using Axios to the backend
       const response = await axios.post(`${Backend_url}/api/content`, {
-        name, // description of the expense
-        amount: parseFloat(amount), // Sends the amount as a number
-        date: selectedDate, // Send selected date
-        category: selectedCategory, // Send selected category
+        name,
+        amount: parseFloat(amount),
+        date: selectedDate,
+        category: selectedCategory,
       });
 
-      
       if (response.status === 201) {
-        console.log("Content created successfully:", response.data);
-        setError(null); 
-        onClose(); // Close the form on success
-
-        // Reset form fields after successful submission
+        setError(null);
+        onClose();
         titleRef.current!.value = "";
         linkRef.current!.value = "";
         setSelectedDate(null);
         setSelectedCategory("");
       }
     } catch (error: any) {
-      if (error.response) {
-        console.error("Error creating content:", error.response.data);
-        setError(error.response.data.error || "Failed to create content.");
-      } else {
-        console.error("Error creating content:", error.message);
-        setError("Failed to create content. Please try again.");
-      }
+      setError("Failed to create content. Please try again.");
     }
   };
 
+  if (!open) return null;
+
   return (
-    <div>
-      {open && (
-        <div>
-          <div className="w-screen h-screen bg-slate-500 fixed top-0 left-0 opacity-60 flex justify-center"></div>
-          <div className="w-screen h-screen fixed left-0 flex justify-center">
-            <span className="bg-white opacity-100 p-4 rounded fixed">
-              <div className="flex justify-end">
-                <div onClick={onClose} className="cursor-pointer">
-                  <CrossIcon />
-                </div>
+    <div className="fixed inset-0 z-50">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4">
+          <div 
+            className="relative w-full max-w-md rounded-xl bg-white shadow-lg"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b p-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Add New Expense
+              </h2>
+              <button 
+                onClick={onClose}
+                className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+              >
+                <CrossIcon />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Name Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Expense Name
+                </label>
+                <Input 
+                  reference={titleRef} 
+                  placeholder="Enter expense name"
+                  className="w-full" 
+                />
               </div>
-              <div>
-                <Input reference={titleRef} placeholder={"Name"} /> 
-                <Input reference={linkRef} placeholder={"Amount"} />
-                {error && <p className="text-red-500">{error}</p>}
-                <div>
-                  <h1>Date</h1>
+
+              {/* Amount Input */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Amount ($)
+                </label>
+                <Input 
+                  reference={linkRef} 
+                  placeholder="0.00"
+                  className="w-full" 
+                />
+              </div>
+
+              {/* Date Picker */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Date
+                </label>
+                <div className="bg-gray-50 rounded-lg p-4">
                   <Calender onChange={(date: Date) => setSelectedDate(date)} />
-                    <br />
-                  <AddCategory onChange={(category: string) => setSelectedCategory(category)} />
-                  <br />
                 </div>
               </div>
-              <div className="flex justify-center">
-                <Button onClick={addContent} variant="primary" text="Submit" />
+
+              {/* Category Selector */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <AddCategory onChange={(category: string) => setSelectedCategory(category)} />
               </div>
-            </span>
+
+              {/* Error Message */}
+              {error && (
+                <div className="text-sm text-red-500 bg-red-50 p-4 rounded-lg border border-red-100">
+                  {error}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-3 border-t p-4 bg-gray-50 rounded-b-xl">
+              <Button
+                onClick={onClose}
+                variant="secondary"
+                text="Cancel"
+                className="px-4 py-2 hover:bg-gray-100"
+              />
+              <Button
+                onClick={addContent}
+                variant="primary"
+                text="Add Expense"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+              />
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

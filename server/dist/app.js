@@ -17,7 +17,7 @@ const cors_1 = __importDefault(require("cors"));
 const client_1 = require("@prisma/client");
 const expenseRoutes_1 = __importDefault(require("./routes/expenseRoutes"));
 const app = (0, express_1.default)();
-const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app"];
+const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app", "http://localhost:3000"];
 app.use((0, cors_1.default)({
     origin: allowedOrigins,
     credentials: true,

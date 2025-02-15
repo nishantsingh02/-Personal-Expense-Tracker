@@ -17,6 +17,7 @@ const SpendingChart: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -33,39 +34,150 @@ const SpendingChart: React.FC = () => {
     fetchTransactions();
   }, []); 
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-  if (!transactions.length) return <div>No Transaction Found !</div> 
+  if (loading) return <div className="h-96 flex items-center justify-center">Loading...</div>;
+  if (error) return <div className="h-96 flex items-center justify-center">{error}</div>;
+  if (!transactions.length) return <div className="h-96 flex items-center justify-center">No Transaction Found !</div> 
 
-  const categoryTotals = transactions.reduce((acc, transaction) => {
-    acc[transaction.category] = 
-      (acc[transaction.category] || 0) + transaction.amount;
+  // Define colors for each category
+  const categoryColors = {
+    Food: "#FF6384",
+    Transport: "#36A2EB",
+    Entertainment: "#FFCE56",
+    Bills: "#4BC0C0",
+    Other: "#9966FF",
+  };
+
+  // First calculate all categories for the legend
+  const allCategories = transactions.reduce((acc, transaction) => {
+    if (!acc[transaction.category]) {
+      acc[transaction.category] = 0;
+    }
+    acc[transaction.category] += transaction.amount;
     return acc;
   }, {} as Record<string, number>);
 
+  // Calculate grand total (including hidden categories)
+  const grandTotal = Object.values(allCategories).reduce((a, b) => a + b, 0);
+
+  // Filter out hidden categories for pie chart
+  const visibleCategories = Object.entries(allCategories)
+    .filter(([category]) => !hiddenCategories.includes(category))
+    .reduce((acc, [category, amount]) => {
+      acc[category] = amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+  // Calculate visible total for percentages
+  const visibleTotal = Object.values(visibleCategories).reduce((a, b) => a + b, 0);
+
+  // Prepare chart data with consistent colors
   const chartData = {
-    labels: Object.keys(categoryTotals),
+    labels: Object.keys(visibleCategories),
     datasets: [{
-      data: Object.values(categoryTotals),
-      backgroundColor: [
-        "#FF6384", "#36A2EB", "#FFCE56", 
-        "#4BC0C0", "#9966FF", "#FF9F40"
-      ],
+      data: Object.values(visibleCategories),
+      backgroundColor: Object.keys(visibleCategories).map(
+        category => categoryColors[category as keyof typeof categoryColors] || "#FF9F40"
+      ),
     }],
   };
 
+  const toggleCategory = (category: string) => {
+    setHiddenCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
   return (
-    <div className="relative h-64">
-      <Pie
-        data={chartData}
-        options={{
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: "bottom" },
-          },
-        }}
-      />
+    <div className="flex flex-col h-[500px]">
+      {/* Chart Title and Total */}
+      <div className="flex justify-between items-center mb-6 px-2">
+        <div>
+          <p className="text-xl text-gray-300 mt-1">
+            Total Spending: ${grandTotal.toLocaleString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Chart Section */}
+      <div className="flex-1 relative min-h-0 mb-8">
+        <Pie
+          data={chartData}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: {
+                  size: 14,
+                  weight: 'bold'
+                },
+                bodyFont: {
+                  size: 13
+                },
+                callbacks: {
+                  label: function(context: any) {
+                    const value = context.raw;
+                    const percentage = ((value / visibleTotal) * 100).toFixed(1);
+                    return ` $${value.toLocaleString()} (${percentage}%)`;
+                  }
+                }
+              }
+            },
+          }}
+        />
+      </div>
+
+      {/* Custom Legend */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-4">
+        {Object.entries(allCategories).map(([category, amount]) => (
+          <div 
+            key={category} 
+            className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-all duration-200
+              ${hiddenCategories.includes(category) 
+                ? 'opacity-50 bg-gray-50' 
+                : 'hover:bg-gray-50'
+              }`}
+            onClick={() => toggleCategory(category)}
+          >
+            <div 
+              className={`w-3 h-3 rounded-full transition-transform duration-200 ${
+                hiddenCategories.includes(category) ? 'scale-75' : ''
+              }`}
+              style={{ 
+                backgroundColor: categoryColors[category as keyof typeof categoryColors] || "#FF9F40" 
+              }}
+            />
+            <div className="flex-1">
+              <div className="flex justify-between items-center">
+                <span className={`text-sm font-medium text-gray-700 ${
+                  hiddenCategories.includes(category) 
+                    ? 'line-through decoration-gray-400'
+                    : ''
+                }`}>
+                  {category}
+                </span>
+                <span className={`text-sm text-gray-600 ${
+                  hiddenCategories.includes(category) 
+                    ? 'line-through decoration-gray-400'
+                    : ''
+                }`}>
+                  ${amount.toLocaleString()}
+                </span>
+              </div>
+              <div className="text-xs text-gray-500">
+                {((amount / grandTotal) * 100).toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

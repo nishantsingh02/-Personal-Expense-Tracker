@@ -36,66 +36,84 @@ const Dashboard: React.FC = () => {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-6 text-3xl font-bold text-gray-900">Personal Expense Tracker</h1>
- 
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent tracking-tight">
+            Personal Expense Tracker
+          </h1>
 
-      <div className="p-4">
-        <CreateContentModel open={modelOpen} onClose={() => setModelOpen(false)} />
-        <div className="fixed right-4 bottom-4 flex flex-col gap-4 md:flex-row md:top-4 md:bottom-auto md:left-auto md:left-4">
           <Button
-        onClick={() => setModelOpen(true)}
-        variant="primary"
-        text="Add Expense"
-        startIcon={<Plusicon />}
-        className="w-full md:w-auto"
+            onClick={() => setModelOpen(true)}
+            variant="primary"
+            text="Add Expense"
+            startIcon={<Plusicon />}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 rounded-full px-6 transform hover:scale-105"
           />
         </div>
-      </div>
-  
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Summary Cards */}
-        <div className="card">
-          <h2 className="mb-2 text-lg font-semibold text-gray-700">Total Balance</h2>
-          <p className="text-2xl font-bold text-primary-600">$ {24500 + transactions.reduce((acc, transaction) => acc - transaction.amount, 0)}</p>
-        </div>
-        
-        <div className="card">
-          <h2 className="mb-2 text-lg font-semibold text-gray-700">Monthly Spending</h2>
-          <p className="text-2xl font-bold text-primary-600">$ {transactions.reduce((acc, transaction) => acc + transaction.amount, 0)}</p>
-        </div>
-        
-        <div className="card">
-          <h2 className="mb-2 text-lg font-semibold text-gray-700">Savings Goal</h2>
-          <p className="text-2xl font-bold text-primary-600">35%</p>
-        </div>
-      </div>
 
-      {/* Charts Section */}
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
-        <div className="card">
-          <h2 className="mb-4 text-lg font-semibold text-gray-700">Spending by Category</h2>
-          <SpendingChart />
+        <CreateContentModel open={modelOpen} onClose={() => setModelOpen(false)} />
+    
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          {/* Summary Cards */}
+          <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Balance</h2>
+            <p className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              ${(24500 + transactions.reduce((acc, transaction) => acc - transaction.amount, 0)).toLocaleString()}
+            </p>
+          </div>
+          
+          <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Monthly Spending</h2>
+            <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+              ${transactions.reduce((acc, transaction) => acc + transaction.amount, 0).toLocaleString()}
+            </p>
+          </div>
+          
+          <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Savings Goal</h2>
+            <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">35%</p>
+          </div>
         </div>
-        
-        <div className="card">
-          <h2 className="mb-4 text-lg font-semibold text-gray-700">Recent Transactions</h2>
-          {/* Transaction list will go here */}
-          <div>
-      <h1>Transaction List</h1>
-      {error && <p className="text-red-500">{error}</p>} {/* Displays error message */}
-      <ol>
-        {transactions.length === 0 ? (
-          <li>No transactions available</li>
-        ) : (
-          transactions.map((transaction) => (
-            <li key={transaction.id}>
-              <strong>{transaction.name}</strong> - {transaction.category} - ${transaction.amount} on {new Date(transaction.date).toLocaleDateString()}
-            </li>
-          ))
-        )}
-      </ol>
-          </div>       
+
+        {/* Charts Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-lg p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h2 className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-6">
+              Spending by Category
+            </h2>
+            <SpendingChart />
+          </div>
+          
+          <div className="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-lg p-6 border border-gray-200/50 dark:border-gray-700/50">
+            <h2 className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-6">
+              Recent Transactions
+            </h2>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            
+            <div className="space-y-3">
+              {transactions.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No transactions available</p>
+              ) : (
+                transactions.map((transaction) => (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600/50 dark:hover:to-gray-700/50 transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50"
+                  >
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{transaction.name}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                      ${transaction.amount.toLocaleString()}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
