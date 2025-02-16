@@ -90,18 +90,18 @@ const SpendingChart: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[500px]">
+    <div className="flex flex-col h-[400px] sm:h-[450px] lg:h-[500px]">
       {/* Chart Title and Total */}
-      <div className="flex justify-between items-center mb-6 px-2">
+      {/*<div className="flex justify-between items-center mb-4 sm:mb-6 px-2 sm:px-4">
         <div>
-          <p className="text-xl text-gray-300 mt-1">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-300">
             Total Spending: ${grandTotal.toLocaleString()}
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Chart Section */}
-      <div className="flex-1 relative min-h-0 mb-8">
+      <div className="relative flex-1 min-h-0 mb-4 sm:mb-6">
         <Pie
           data={chartData}
           options={{
@@ -135,11 +135,11 @@ const SpendingChart: React.FC = () => {
       </div>
 
       {/* Custom Legend */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 px-2 sm:px-4 overflow-y-auto">
         {Object.entries(allCategories).map(([category, amount]) => (
           <div 
             key={category} 
-            className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-all duration-200
+            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-200
               ${hiddenCategories.includes(category) 
                 ? 'opacity-50 bg-gray-50' 
                 : 'hover:bg-gray-50'
@@ -147,16 +147,16 @@ const SpendingChart: React.FC = () => {
             onClick={() => toggleCategory(category)}
           >
             <div 
-              className={`w-3 h-3 rounded-full transition-transform duration-200 ${
+              className={`w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full flex-shrink-0 transition-transform duration-200 ${
                 hiddenCategories.includes(category) ? 'scale-75' : ''
               }`}
               style={{ 
                 backgroundColor: categoryColors[category as keyof typeof categoryColors] || "#FF9F40" 
               }}
             />
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <span className={`text-sm font-medium text-gray-700 ${
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-center gap-2">
+                <span className={`text-sm font-medium text-gray-700 truncate ${
                   hiddenCategories.includes(category) 
                     ? 'line-through decoration-gray-400'
                     : ''
