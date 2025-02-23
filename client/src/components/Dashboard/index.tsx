@@ -1,7 +1,7 @@
-import React, {useEffect,useState} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import SpendingChart from '../Charts/SpendingChart';
-import  { Button }  from '../Icons/Button';
-import { Plusicon} from '../Icons/Plusicon';
+import { Button } from '../Icons/Button';
+import { Plusicon } from '../Icons/Plusicon';
 import { CreateContentModel } from '../CreateContentModel';
 import axios from "axios";
 const Backend_url = process.env.REACT_APP_BACKEND_URL;
@@ -15,25 +15,64 @@ interface Transaction {
 }
 
 const Dashboard: React.FC = () => {
-     const [modelOpen, setModelOpen] = React.useState(false);
-     const [transactions, setTransactions] = useState<Transaction[]>([]);
-     const [error, setError] = useState<string | null>(null);
-   
-     // Fetch transactions from the backend
-     useEffect(() => {
-       const fetchTransactions = async () => {
-         try {
-           const response = await axios.get(`${Backend_url}/api/transactions`);
-           setTransactions(response.data); // Set the transactions data from the backend
-         } catch (err) {
-           console.error("Error fetching transactions:", err);
-           setError("Failed to fetch transactions.");
-         }
-       };
-   
-       fetchTransactions();
-     }, []); // Empty dependency array 
+  const [modelOpen, setModelOpen] = React.useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Added AbortController for cleanup
+  const abortControllerRef = useRef<AbortController>();
+  
+  // Added Cache control headers for API requests
+  const cacheConfig = {
+    headers: {
+      'Cache-Control': 'max-age=300', 
+    }
+  };
 
+  // Memoize fetch function to prevent unnecessary recreations
+  const fetchTransactions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      abortControllerRef.current = new AbortController();
+      
+      const response = await axios.get(
+        `${Backend_url}/api/transactions`,
+        {
+          ...cacheConfig,
+          signal: abortControllerRef.current.signal,
+          timeout: 5000 
+        }
+      );
+      
+      setTransactions(response.data);
+      setError(null);
+    } catch (err) {
+      if (axios.isCancel(err)) {
+        return; 
+      }
+      console.error("Error fetching transactions:", err);
+      setError("Failed to fetch transactions.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []); // Empty dependency array to prevent re-fetching on every render
+
+  useEffect(() => {
+    fetchTransactions();
+    
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchTransactions]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -91,29 +130,32 @@ const Dashboard: React.FC = () => {
               Recent Transactions
             </h2>
             {error && <p className="text-red-500 mb-4">{error}</p>}
-            
-            <div className="space-y-3">
-              {transactions.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No transactions available</p>
-              ) : (
-                transactions.map((transaction) => (
-                  <div 
-                    key={transaction.id} 
-                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600/50 dark:hover:to-gray-700/50 transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50"
-                  >
-                    <div>
-                      <h3 className="font-medium text-gray-900 dark:text-white">{transaction.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
-                      </p>
+            {isLoading ? (
+              <p className="text-gray-500 text-center py-4">Loading transactions...</p>
+            ) : (
+              <div className="space-y-3">
+                {transactions.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No transactions available</p>
+                ) : (
+                  transactions.map((transaction) => (
+                    <div 
+                      key={transaction.id} 
+                      className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-600/50 dark:hover:to-gray-700/50 transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50"
+                    >
+                      <div>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{transaction.name}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        ${transaction.amount.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="text-lg font-semibold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                      ${transaction.amount.toLocaleString()}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -121,4 +163,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
