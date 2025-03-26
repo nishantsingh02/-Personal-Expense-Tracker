@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
         {
           ...cacheConfig,
           signal: abortControllerRef.current.signal,
-          timeout: 5000 
+          timeout: 10000 
         }
       );
       
@@ -57,7 +57,6 @@ const Dashboard: React.FC = () => {
         return; 
       }
       console.error("Error fetching transactions:", err);
-      setError("Failed to fetch transactions.");
     } finally {
       setIsLoading(false);
     }
