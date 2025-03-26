@@ -1,5 +1,8 @@
 # Personal Expense Tracker Project
 
+[!Watch Video](https://github.com/user-attachments/assets/c97376a3-aba5-4eda-bc85-2565991f9918)
+
+
 ## Overview
 This project is a full-stack Personal Expense Tracker that provides personal budget tracking and financial analysis capabilities.
 
