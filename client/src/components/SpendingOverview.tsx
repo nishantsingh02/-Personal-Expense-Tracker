@@ -1,0 +1,143 @@
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import axios from "axios";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+const Backend_url = import.meta.env.VITE_BACKEND_URL;
+
+interface Transaction {
+  id: string;
+  amount: number;
+  date: string;
+  category: string;
+}
+
+interface MonthlyData {
+  name: string;
+  amount: number;
+}
+
+const SpendingOverview: React.FC = () => {
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const processTransactions = useCallback((transactions: Transaction[]) => {
+    // Process transactions into monthly totals
+    const monthlyTotals = transactions.reduce((acc: { [key: string]: number }, transaction: Transaction) => {
+      const date = new Date(transaction.date);
+      const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      acc[monthYear] = (acc[monthYear] || 0) + transaction.amount;
+      return acc;
+    }, {});
+
+    const chartData: MonthlyData[] = Object.entries(monthlyTotals).map(([name, amount]) => ({
+      name,
+      amount: Number(amount)
+    }));
+
+    setMonthlyData(chartData);
+  }, []);
+
+  const fetchTransactions = useCallback(async () => {
+    try {
+      setLoading(true);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      abortControllerRef.current = new AbortController();
+      
+      const token = localStorage.getItem('token');
+      const response = await axios.get<Transaction[]>(
+        `${Backend_url}/transactions`,
+        {
+          signal: abortControllerRef.current.signal,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      setError(null);
+      processTransactions(response.data);
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error("Error fetching transactions:", error);
+        setError('Failed to fetch transactions');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [processTransactions]);
+
+  useEffect(() => {
+    fetchTransactions();
+
+    const handleTransactionAdded = () => {
+      fetchTransactions(); // Fetch all transactions to ensure data consistency
+    };
+
+    window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      window.removeEventListener('transactionAdded', handleTransactionAdded as EventListener);
+    };
+  }, [fetchTransactions]);
+
+  if (loading) return <div className="h-[300px] flex items-center justify-center">Loading...</div>;
+  if (error) return <div className="h-[300px] flex items-center justify-center text-red-500">{error}</div>;
+  if (monthlyData.length === 0) return (
+    <div className="h-[300px] flex flex-col items-center justify-center text-center p-6">
+      <div className="text-slate-400 dark:text-slate-500 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300">No Transactions</h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Add your first transaction to see spending patterns</p>
+    </div>
+  );
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip 
+              formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+              labelFormatter={(label) => `Month: ${label}`}
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                textAlign: 'center'
+              }}
+            />
+            <Bar dataKey="amount" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+export default SpendingOverview;
+
+
+
+

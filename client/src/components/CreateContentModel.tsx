@@ -2,17 +2,23 @@ import { useState, useRef } from "react";
 import { CrossIcon } from "./Icons/CrossIcon";
 import { Button } from "./Icons/Button";
 import { Input } from "./Icons/Input";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Calender from "./Calender";
-import AddCategory from "./Category";
-const Backend_url = process.env.REACT_APP_BACKEND_URL;
+import { useAuth } from "../contexts/AuthContext";
+
+const Backend_url = import.meta.env.VITE_BACKEND_URL;
 
 interface CreateContentModelProps {
   open: boolean;
   onClose: () => void;
 }
 
+interface ErrorResponse {
+  error: string;
+}
+
 export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
+  const { token } = useAuth();
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,14 +37,34 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     }
 
     try {
-      const response = await axios.post(`${Backend_url}/api/content`, {
+      const formattedDate = date.toISOString().split('T')[0];
+      
+      const response = await axios.post(`${Backend_url}/transactions`, {
         name,
         amount: parseFloat(amount),
-        date: selectedDate,
+        date: formattedDate,
         category: selectedCategory,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (response.status === 201) {
+        // Dispatch custom event with the new transaction data
+        const newTransaction = {
+          id: response.data.id,
+          description: name,
+          category: selectedCategory,
+          date: formattedDate,
+          amount: parseFloat(amount)
+        };
+        
+        const event = new CustomEvent('transactionAdded', {
+          detail: newTransaction
+        });
+        window.dispatchEvent(event);
+
         setError(null);
         onClose();
         titleRef.current!.value = "";
@@ -46,8 +72,9 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
         setSelectedDate(null);
         setSelectedCategory("");
       }
-    } catch (error: any) {
-      setError("Failed to create content. Please try again.");
+    } catch (err) {
+      const error = err as AxiosError<ErrorResponse>;
+      setError(error.response?.data?.error || "Failed to create expense. Please try again.");
     }
   };
 
@@ -65,17 +92,17 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
       <div className="fixed inset-0 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
           <div 
-            className="relative w-full max-w-md rounded-xl bg-white shadow-lg"
+            className="relative w-full max-w-md rounded-xl bg-white shadow-lg dark:bg-gray-800"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b p-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+            <div className="flex items-center justify-between border-b p-4 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Add New Expense
               </h2>
               <button 
                 onClick={onClose}
-                className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <CrossIcon />
               </button>
@@ -85,64 +112,85 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
             <div className="p-6 space-y-6">
               {/* Name Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Expense Name
                 </label>
-                <Input 
-                  reference={titleRef} 
+                <Input
+                  reference={titleRef}
                   placeholder="Enter expense name"
-                  className="w-full" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" 
                 />
               </div>
 
               {/* Amount Input */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Amount ($)
                 </label>
                 <Input 
-                  reference={linkRef} 
+                  reference={linkRef}
                   placeholder="0.00"
-                  className="w-full" 
-                />
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" 
+                /> 
               </div>
 
               {/* Date Picker */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Date
                 </label>
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <Calender onChange={(date: Date) => setSelectedDate(date)} />
                 </div>
               </div>
 
               {/* Category Selector */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <AddCategory onChange={(category: string) => setSelectedCategory(category)} />
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Category
+                </label>
+                <div className="relative">
+                  <select
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    value={selectedCategory}
+                    className="w-full px-4 py-2.5 text-base bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 cursor-pointer appearance-none"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="text-sm text-red-500 bg-red-50 p-4 rounded-lg border border-red-100">
+                <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-800">
                   {error}
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 border-t p-4 bg-gray-50 rounded-b-xl">
+            <div className="flex items-center justify-end gap-3 p-4 border-t dark:border-gray-700">
               <Button
                 onClick={onClose}
                 variant="secondary"
                 text="Cancel"
-                className="px-4 py-2 hover:bg-gray-100"
+                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
               />
               <Button
                 onClick={addContent}
                 variant="primary"
                 text="Add Expense"
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
               />
             </div>
           </div>

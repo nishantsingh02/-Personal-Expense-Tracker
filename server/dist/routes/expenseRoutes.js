@@ -13,20 +13,98 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const expenseController_1 = require("../controllers/expenseController");
 const client_1 = require("@prisma/client");
+const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
-router.post("/content", expenseController_1.createExpense);
 const prisma = new client_1.PrismaClient();
-// Routes to get all expenses (transactions)
-router.get("/transactions", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Middleware to authenticate token for all routes
+router.use(auth_1.authenticateToken);
+// Get transactions for the authenticated user
+router.get('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const transactions = yield prisma.expenses.findMany(); // Fetchs all transactions from the expenses table
-        res.status(200).json(transactions); // Sends the transactions back to the frontend
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+        const transactions = yield prisma.expenses.findMany({
+            where: { userId },
+            orderBy: { date: 'desc' },
+            select: {
+                id: true,
+                name: true,
+                amount: true,
+                category: true,
+                date: true
+            }
+        });
+        // Transform the data to match frontend expectations
+        const transformedTransactions = transactions.map(t => ({
+            id: t.id.toString(),
+            description: t.name,
+            amount: t.amount,
+            category: t.category,
+            date: t.date.toISOString()
+        }));
+        res.status(200).json(transformedTransactions);
     }
     catch (error) {
-        console.error("Error fetching transactions:", error);
-        res.status(500).json({ error: "Failed to fetch transactions." });
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ error: 'Failed to fetch transactions' });
+    }
+}));
+// Add a new transaction for the authenticated user
+router.post('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId; // Extract userId from authenticated request
+        const { name, amount, date, category } = req.body; // Get the expense details from the request body
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+            return;
+        }
+        const newTransaction = yield prisma.expenses.create({
+            data: {
+                userId, // Link the transaction to the authenticated user
+                name,
+                amount: Number(amount), // Ensure amount is a number
+                category,
+                date: new Date(date), // Ensure the date is stored as a Date object
+            },
+        });
+        res.status(201).json(newTransaction); // Return the created transaction
+    }
+    catch (error) {
+        console.error('Error creating transaction:', error);
+        res.status(500).json({ error: 'Failed to create transaction' });
+        return;
+    }
+}));
+// Delete a transaction for the authenticated user
+router.delete('/transactions/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId; // Extract userId from authenticated request
+        const expenseId = parseInt(req.params.id); // Get the expense ID from the URL parameter
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized: User not authenticated' });
+            return;
+        }
+        const expense = yield prisma.expenses.findFirst({
+            where: { id: expenseId, userId }, // Ensure the expense belongs to the authenticated user
+        });
+        if (!expense) {
+            res.status(404).json({ error: 'Expense not found' });
+        }
+        yield prisma.expenses.delete({ where: { id: expenseId } }); // Delete the expense
+        res.status(200).json({ message: 'Expense deleted successfully' });
+        return;
+    }
+    catch (error) {
+        console.error('Error deleting transaction:', error);
+        res.status(500).json({ error: 'Failed to delete transaction' });
+        return;
     }
 }));
 exports.default = router;

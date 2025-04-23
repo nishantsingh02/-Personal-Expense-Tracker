@@ -1,19 +1,35 @@
-import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import { SignIn } from './components/auth/Signin';
+import { Signup } from './components/auth/Signup';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Toaster } from 'sonner';
 
-const queryClient = new QueryClient();
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/signin" />;
+};
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Dashboard /> {/* Dashboard Interface*/}
-        </div>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+        </Routes>
       </Router>
-    </QueryClientProvider>
+      <Toaster position="top-right" />
+    </AuthProvider>
   );
 }
 

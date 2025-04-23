@@ -13,25 +13,27 @@ exports.createExpense = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, amount, date, category } = req.body;
-    if (!name || !amount || !category || !date) {
-        res.status(400).json({ error: "All fields are required." });
-    }
+    var _a;
     try {
+        const { name, amount, date, category } = req.body;
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+        if (!userId) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
         const expense = yield prisma.expenses.create({
             data: {
                 name,
-                amount: parseFloat(amount),
+                amount,
                 date: new Date(date),
                 category,
-            },
+                userId
+            }
         });
-        res.status(201).json({ message: "Content Added", expense });
-        console.log("Content created successfully:", expense);
+        res.status(201).json(expense);
     }
     catch (error) {
-        console.error("Error creating content:", error);
-        res.status(500).json({ error: "Failed to create content." });
+        console.error("Error creating expense:", error);
+        res.status(500).json({ error: "Failed to create expense" });
     }
 });
 exports.createExpense = createExpense;

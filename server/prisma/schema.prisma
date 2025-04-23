@@ -13,12 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }  
 
+// User Schema
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  expenses      Expenses[]
+}
+
 // Expenses Schema
 model Expenses {                    
   id        Int    @id @default(autoincrement()) @db.Integer
-  name     String  @unique
+  name     String
   amount   Float
   date     DateTime @db.Date
   category String
+  user     User?    @relation(fields: [userId], references: [id])
+  userId   Int?
 }
 

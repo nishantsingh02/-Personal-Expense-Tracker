@@ -4,25 +4,27 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const createExpense = async (req: Request, res: Response) => {
-  const { name, amount, date, category } = req.body;
-
-  if (!name || !amount || !category || !date) {
-    res.status(400).json({ error: "All fields are required." });
-  }
-
   try {
-    const expense = await prisma.expenses.create({    // Creates the expense using Prisma
+    const { name, amount, date, category } = req.body;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const expense = await prisma.expenses.create({
       data: {
         name,
-        amount: parseFloat(amount),
+        amount,
         date: new Date(date),
         category,
-      },
+        userId
+      }
     });
-     res.status(201).json({ message: "Content Added", expense });
-     console.log("Content created successfully:", expense);
+
+    res.status(201).json(expense);
   } catch (error) {
-    console.error("Error creating content:", error);
-    res.status(500).json({ error: "Failed to create content." });
+    console.error("Error creating expense:", error);
+    res.status(500).json({ error: "Failed to create expense" });
   }
 };

@@ -1,5 +1,5 @@
 interface InputProps {
-    reference: React.RefObject<HTMLInputElement>;
+    reference: React.RefObject<HTMLInputElement | null>;
     placeholder: string;
     className?: string;  // Make className optional
 }

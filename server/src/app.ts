@@ -1,21 +1,36 @@
 import express from "express";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
 import expenseRoutes from "./routes/expenseRoutes";
+import authRoutes from './routes/auth';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
-const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app","http://localhost:3000"];
+const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app","http://localhost:3000","http://localhost:5173"];
 
+// Middleware
 app.use(
   cors({
     origin: allowedOrigins,
-    credentials: true, 
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 app.use(express.json());
 
-// Use the expense route
+// Routes
+app.use('/api/auth', authRoutes);
 app.use("/api", expenseRoutes);
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 const prisma = new PrismaClient();
 
@@ -31,9 +46,9 @@ const prisma = new PrismaClient();
 
 const PORT = process.env.PORT || 5000;
 
-
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`JWT_SECRET is set: ${!!process.env.JWT_SECRET}`);
 });
 
 export default app;
