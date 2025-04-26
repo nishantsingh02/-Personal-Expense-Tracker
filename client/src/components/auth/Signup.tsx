@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
-import api from '@/utils/axios';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { AuthResponse } from '../types';
 
 export const Signup: React.FC = () => {
   const [name, setName] = useState('');
@@ -17,15 +17,12 @@ export const Signup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('Attempting registration with:', { name, email });
-      
-      const response = await api.post('/auth/register', {
+      const response = await axios.post<AuthResponse>('/auth/register', {
         name,
         email,
         password,
       });
 
-      console.log('Registration response:', response.data);
       const { token, user } = response.data;
       
       // Store auth data
@@ -35,15 +32,8 @@ export const Signup: React.FC = () => {
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err) {
-      const error = err as AxiosError<{ error: string }>;
-      console.error('Registration error details:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
-      
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to create account';
-      toast.error(errorMessage);
+      const error = err instanceof Error ? err.message : 'Failed to create account';
+      toast.error(error);
     }
   };
 

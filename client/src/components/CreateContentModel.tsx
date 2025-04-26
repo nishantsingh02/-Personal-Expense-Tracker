@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import React, { useRef, useState } from 'react';
 import { CrossIcon } from "./Icons/CrossIcon";
-import { Button } from "./Icons/Button";
-import { Input } from "./Icons/Input";
-import axios, { AxiosError } from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import axios from 'axios';
 import Calender from "./Calender";
 import { useAuth } from "../contexts/AuthContext";
+import { Transaction } from '../types';
 
 const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
@@ -39,7 +40,7 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     try {
       const formattedDate = date.toISOString().split('T')[0];
       
-      const response = await axios.post(`${Backend_url}/transactions`, {
+      const response = await axios.post<Transaction>(`${Backend_url}/transactions`, {
         name,
         amount: parseFloat(amount),
         date: formattedDate,
@@ -73,8 +74,8 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
         setSelectedCategory("");
       }
     } catch (err) {
-      const error = err as AxiosError<ErrorResponse>;
-      setError(error.response?.data?.error || "Failed to create expense. Please try again.");
+      const error = err instanceof Error ? err.message : "Failed to create expense. Please try again.";
+      setError(error);
     }
   };
 

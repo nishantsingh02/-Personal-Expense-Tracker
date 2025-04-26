@@ -9,15 +9,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { Transaction } from '../types';
 
 const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
-
-interface Transaction {
-  id: string;
-  amount: number;
-  date: string;
-  category: string;
-}
 
 interface MonthlyData {
   name: string;
@@ -25,7 +19,7 @@ interface MonthlyData {
 }
 
 const SpendingOverview: React.FC = () => {
-  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -34,7 +28,7 @@ const SpendingOverview: React.FC = () => {
     // Ensure transactions is an array
     if (!Array.isArray(transactions)) {
       console.error('Expected transactions to be an array, got:', transactions);
-      setMonthlyData([]);
+      setTransactions([]);
       return;
     }
 
@@ -51,7 +45,7 @@ const SpendingOverview: React.FC = () => {
       amount: Number(amount)
     }));
 
-    setMonthlyData(chartData);
+    setTransactions(chartData);
   }, []);
 
   const fetchTransactions = useCallback(async () => {
@@ -65,9 +59,8 @@ const SpendingOverview: React.FC = () => {
       
       const token = localStorage.getItem('token');
       const response = await axios.get<Transaction[]>(
-        `${Backend_url}/transactions`,
+        `${import.meta.env.VITE_PRODUCTION_BACKEND_URL}/transactions`,
         {
-          signal: abortControllerRef.current.signal,
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -75,24 +68,23 @@ const SpendingOverview: React.FC = () => {
       );
       
       setError(null);
-      // Ensure we're passing an array to processTransactions
       const transactions = Array.isArray(response.data) ? response.data : [];
-      processTransactions(transactions);
+      setTransactions(transactions);
     } catch (error) {
-      if (!axios.isCancel(error)) {
+      if (error instanceof Error) {
         console.error("Error fetching transactions:", error);
         setError('Failed to fetch transactions');
       }
     } finally {
       setLoading(false);
     }
-  }, [processTransactions]);
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
 
     const handleTransactionAdded = () => {
-      fetchTransactions(); // Fetch all transactions to ensure data consistency
+      fetchTransactions();
     };
 
     window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);
@@ -107,7 +99,7 @@ const SpendingOverview: React.FC = () => {
 
   if (loading) return <div className="h-[300px] flex items-center justify-center">Loading...</div>;
   if (error) return <div className="h-[300px] flex items-center justify-center text-red-500">{error}</div>;
-  if (monthlyData.length === 0) return (
+  if (transactions.length === 0) return (
     <div className="h-[300px] flex flex-col items-center justify-center text-center p-6">
       <div className="text-slate-400 dark:text-slate-500 mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +115,7 @@ const SpendingOverview: React.FC = () => {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData}>
+          <BarChart data={transactions}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
