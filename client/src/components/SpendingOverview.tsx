@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
 interface Transaction {
   id: string;
@@ -31,6 +31,13 @@ const SpendingOverview: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const processTransactions = useCallback((transactions: Transaction[]) => {
+    // Ensure transactions is an array
+    if (!Array.isArray(transactions)) {
+      console.error('Expected transactions to be an array, got:', transactions);
+      setMonthlyData([]);
+      return;
+    }
+
     // Process transactions into monthly totals
     const monthlyTotals = transactions.reduce((acc: { [key: string]: number }, transaction: Transaction) => {
       const date = new Date(transaction.date);
@@ -68,7 +75,9 @@ const SpendingOverview: React.FC = () => {
       );
       
       setError(null);
-      processTransactions(response.data);
+      // Ensure we're passing an array to processTransactions
+      const transactions = Array.isArray(response.data) ? response.data : [];
+      processTransactions(transactions);
     } catch (error) {
       if (!axios.isCancel(error)) {
         console.error("Error fetching transactions:", error);

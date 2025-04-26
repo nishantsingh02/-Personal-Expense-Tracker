@@ -26,7 +26,7 @@ export const FinancialSummary: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [initialBalance, setInitialBalance] = useState<number>(0); // Default initial balance
+  const [initialBalance, setInitialBalance] = useState<number>(0);
   const [balanceInput, setBalanceInput] = useState<string>("");
   const [isBalanceDialogOpen, setIsBalanceDialogOpen] = useState<boolean>(false);
   
@@ -45,7 +45,8 @@ export const FinancialSummary: React.FC = () => {
       setError(null);
       
       const response = await api.get('/transactions');
-      const fetchedTransactions = response.data;
+      // Ensure we're getting an array
+      const fetchedTransactions = Array.isArray(response.data) ? response.data : [];
       
       setTransactions(fetchedTransactions);
       
@@ -71,8 +72,10 @@ export const FinancialSummary: React.FC = () => {
     };
   }, [fetchTransactions]);
 
-  // Calculate total spending
-  const totalSpending = transactions.reduce((acc, transaction) => acc + transaction.amount, 0);
+  // Calculate total spending with safety check
+  const totalSpending = Array.isArray(transactions) 
+    ? transactions.reduce((acc, transaction) => acc + transaction.amount, 0)
+    : 0;
   
   // Calculate current balance (initial balance - total spending)
   // Ensure balance doesn't go below 0

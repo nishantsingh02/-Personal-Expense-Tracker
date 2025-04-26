@@ -6,7 +6,7 @@ import axios, { AxiosError } from "axios";
 import Calender from "./Calender";
 import { useAuth } from "../contexts/AuthContext";
 
-const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
 interface CreateContentModelProps {
   open: boolean;

@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// Determine which backend URL to use based on environment
-const isDevelopment = import.meta.env.VITE_NODE_ENV === 'development';
-const baseURL = isDevelopment 
-  ? import.meta.env.VITE_BACKEND_URL 
-  : import.meta.env.VITE_PRODUCTION_BACKEND_URL;
+// Use production backend URL
+const baseURL = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
 // Create axios instance with default config
 const api = axios.create({

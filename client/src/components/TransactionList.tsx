@@ -19,8 +19,10 @@ export const TransactionList: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await api.get('/transactions');
-      console.log("Fetched transactions:", response.data);
-      setTransactions(response.data);
+      // Ensure we're setting an array
+      const transactions = Array.isArray(response.data) ? response.data : [];
+      console.log("Fetched transactions:", transactions);
+      setTransactions(transactions);
       setError(null);
     } catch (err) {
       console.error("Error fetching transactions:", err);
@@ -34,9 +36,8 @@ export const TransactionList: React.FC = () => {
     fetchTransactions();
 
     // Listen for new transaction events
-    const handleTransactionAdded = (event: CustomEvent<Transaction>) => {
-      const newTransaction = event.detail;
-      setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+    const handleTransactionAdded = () => {
+      fetchTransactions(); // Fetch all transactions to ensure data consistency
     };
 
     window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);
@@ -122,7 +123,7 @@ export const TransactionList: React.FC = () => {
               </div>
               
               <div className="space-y-4">
-                {transactions.slice(0, displayCount).map((transaction, index) => (
+                {Array.isArray(transactions) && transactions.slice(0, displayCount).map((transaction, index) => (
                   <TransactionItem key={transaction.id} transaction={transaction} index={index} />
                 ))}
               </div>

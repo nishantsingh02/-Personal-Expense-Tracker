@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, TooltipItem } from 'chart.js';
 
-const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Transaction {
@@ -23,13 +23,20 @@ const SpendingChart: React.FC = () => {
     try {
       // Get token from localStorage
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        setLoading(false);
+        return;
+      }
       
       const response = await axios.get(`${Backend_url}/transactions`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      setTransactions(response.data);
+      // Ensure we're setting an array
+      const transactions = Array.isArray(response.data) ? response.data : [];
+      setTransactions(transactions);
       setLoading(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -42,9 +49,8 @@ const SpendingChart: React.FC = () => {
     fetchTransactions();
 
     // Listen for new transaction events
-    const handleTransactionAdded = (event: CustomEvent<Transaction>) => {
-      const newTransaction = event.detail;
-      setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+    const handleTransactionAdded = () => {
+      fetchTransactions(); // Fetch all transactions to ensure data consistency
     };
 
     window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);

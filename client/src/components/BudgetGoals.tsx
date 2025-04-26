@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const Backend_url = import.meta.env.VITE_BACKEND_URL;
+const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
 interface Transaction {
   id: string;
@@ -29,7 +29,7 @@ export const BudgetGoals: React.FC = () => {
         abortControllerRef.current.abort();
       }
       
-      // Creates new AbortController for this request
+      // Create new AbortController for this request
       abortControllerRef.current = new AbortController();
       
       const token = localStorage.getItem('token');
@@ -40,7 +40,9 @@ export const BudgetGoals: React.FC = () => {
         signal: abortControllerRef.current.signal
       });
       
-      setTransactions(response.data);
+      // Ensure we're setting an array
+      const transactions = Array.isArray(response.data) ? response.data : [];
+      setTransactions(transactions);
       setLoading(false);
     } catch (error) {
       // Only set error if it's not a cancellation
@@ -57,21 +59,31 @@ export const BudgetGoals: React.FC = () => {
 
     // Listen for new transaction events
     const handleTransactionAdded = () => {
-      fetchTransactions();
+      fetchTransactions(); // Fetch all transactions to ensure data consistency
     };
 
-    window.addEventListener('transactionAdded', handleTransactionAdded);
+    window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);
 
     // Cleanup function to cancel any ongoing requests and remove event listener
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      window.removeEventListener('transactionAdded', handleTransactionAdded);
+      window.removeEventListener('transactionAdded', handleTransactionAdded as EventListener);
     };
   }, []);
 
   const calculateCategoryTotals = () => {
+    // Ensure transactions is an array
+    if (!Array.isArray(transactions)) {
+      console.error('Expected transactions to be an array, got:', transactions);
+      return {
+        categoryTotals: [],
+        totalSpent: 0,
+        percentageOfBudget: 0
+      };
+    }
+
     const categoryTotals = transactions.reduce((acc, transaction) => {
       if (!acc[transaction.category]) {
         acc[transaction.category] = 0;
