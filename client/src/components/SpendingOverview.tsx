@@ -11,15 +11,15 @@ import {
 } from "recharts";
 import { Transaction } from '../types';
 
-const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 
 interface MonthlyData {
   name: string;
   amount: number;
 }
 
-const SpendingOverview: React.FC = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+export const SpendingOverview: React.FC = () => {
+  const [, setTransactions] = useState<Transaction[]>([]);
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -28,7 +28,7 @@ const SpendingOverview: React.FC = () => {
     // Ensure transactions is an array
     if (!Array.isArray(transactions)) {
       console.error('Expected transactions to be an array, got:', transactions);
-      setTransactions([]);
+      setMonthlyData([]);
       return;
     }
 
@@ -45,7 +45,7 @@ const SpendingOverview: React.FC = () => {
       amount: Number(amount)
     }));
 
-    setTransactions(chartData);
+    setMonthlyData(chartData);
   }, []);
 
   const fetchTransactions = useCallback(async () => {
@@ -70,6 +70,7 @@ const SpendingOverview: React.FC = () => {
       setError(null);
       const transactions = Array.isArray(response.data) ? response.data : [];
       setTransactions(transactions);
+      processTransactions(transactions);
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error fetching transactions:", error);
@@ -78,7 +79,7 @@ const SpendingOverview: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [processTransactions]);
 
   useEffect(() => {
     fetchTransactions();
@@ -99,7 +100,7 @@ const SpendingOverview: React.FC = () => {
 
   if (loading) return <div className="h-[300px] flex items-center justify-center">Loading...</div>;
   if (error) return <div className="h-[300px] flex items-center justify-center text-red-500">{error}</div>;
-  if (transactions.length === 0) return (
+  if (monthlyData.length === 0) return (
     <div className="h-[300px] flex flex-col items-center justify-center text-center p-6">
       <div className="text-slate-400 dark:text-slate-500 mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,7 +116,7 @@ const SpendingOverview: React.FC = () => {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={transactions}>
+          <BarChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />

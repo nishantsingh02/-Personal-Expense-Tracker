@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { CrossIcon } from "./Icons/CrossIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,6 @@ const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
 interface CreateContentModelProps {
   open: boolean;
   onClose: () => void;
-}
-
-interface ErrorResponse {
-  error: string;
 }
 
 export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
@@ -117,7 +113,7 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
                   Expense Name
                 </label>
                 <Input
-                  reference={titleRef}
+                  ref={titleRef}
                   placeholder="Enter expense name"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" 
                 />
@@ -129,7 +125,7 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
                   Amount ($)
                 </label>
                 <Input 
-                  reference={linkRef}
+                  ref={linkRef}
                   placeholder="0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" 
                 /> 
@@ -183,16 +179,18 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
             <div className="flex items-center justify-end gap-3 p-4 border-t dark:border-gray-700">
               <Button
                 onClick={onClose}
-                variant="secondary"
-                text="Cancel"
+                variant="outline"
                 className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-              />
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={addContent}
-                variant="primary"
-                text="Add Expense"
+                variant="default"
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
-              />
+              >
+                Add Expense
+              </Button>
             </div>
           </div>
         </div>

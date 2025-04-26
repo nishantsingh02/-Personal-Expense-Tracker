@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { AuthResponse } from '../types';
+import { AuthResponse } from '@/types';
 
 export const Signup: React.FC = () => {
   const [name, setName] = useState('');
