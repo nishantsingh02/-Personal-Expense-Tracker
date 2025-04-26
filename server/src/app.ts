@@ -9,7 +9,12 @@ import authRoutes from './routes/auth';
 dotenv.config();
 
 const app = express();
-const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app","http://localhost:3000","http://localhost:5173"];
+const allowedOrigins = [
+  "https://personal-expense-tracker-kohl.vercel.app",
+  "https://personal-expense-tracker-xi.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173"
+];
 
 // Middleware
 app.use(
