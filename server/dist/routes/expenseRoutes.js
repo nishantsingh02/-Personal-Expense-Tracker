@@ -18,7 +18,7 @@ const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 // Middleware to authenticate token for all routes
-router.use(auth_1.authenticateToken);
+router.use(auth_1.authMiddleware);
 // Get transactions for the authenticated user
 router.get('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

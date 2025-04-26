@@ -7,37 +7,40 @@ const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
+// Helper function to generate token with longer expiration
+const generateToken = (userId: number, email: string): string => {
+  return jwt.sign(
+    { userId, email },
+    JWT_SECRET,
+    { expiresIn: '30d' } 
+  );
+};
+
 // Register new user
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    console.log('Registration attempt:', { name: req.body.name, email: req.body.email });
     const { name, email, password } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
-      console.log('Missing required fields');
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
 
     // Check if user already exists
-    console.log('Checking if user exists:', email);
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
     
     if (existingUser) {
-      console.log('User already exists:', email);
       res.status(400).json({ error: 'User already exists' });
       return;
     }
 
     // Hash password
-    console.log('Hashing password');
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Create user
-    console.log('Creating user');
     const user = await prisma.user.create({
       data: {
         name,
@@ -47,14 +50,8 @@ router.post('/register', async (req: Request, res: Response) => {
     });
     
     // Generate JWT token
-    console.log('Generating JWT token');
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = generateToken(user.id, user.email);
 
-    console.log('Registration successful:', { userId: user.id, email: user.email });
     res.status(201).json({
       user: {
         id: user.id,
@@ -66,55 +63,41 @@ router.post('/register', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Failed to create user' });
-    return;
   }
 });
 
 // Login user
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    console.log('Login attempt:', { email: req.body.email });
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
-      console.log('Missing credentials');
       res.status(400).json({ error: 'Missing email or password' });
       return;
     }
 
     // Find user
-    console.log('Finding user:', email);
     const user = await prisma.user.findUnique({
       where: { email }
     });
     
     if (!user) {
-      console.log('User not found:', email);
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
     // Verify password
-    console.log('Verifying password');
     const validPassword = await bcrypt.compare(password, user.password);
-    console.log('Password verification result:', validPassword);
     
     if (!validPassword) {
-      console.log('Invalid password for user:', email);
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
     // Generate JWT token
-    console.log('Generating JWT token');
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = generateToken(user.id, user.email);
 
-    console.log('Login successful:', { userId: user.id, email: user.email });
     res.json({
       user: {
         id: user.id,
@@ -126,7 +109,40 @@ router.post('/login', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Failed to login' });
-    return;
+  }
+});
+
+// Refresh token
+router.post('/refresh-token', async (req: Request, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'No token provided' });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    try {
+      // First try to verify the token
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
+      const newToken = generateToken(decoded.userId, decoded.email);
+      res.json({ token: newToken });
+    } catch (jwtError) {
+      // If verification fails, try to decode without verification
+      const decoded = jwt.decode(token) as { userId: number; email: string } | null;
+      
+      if (decoded && decoded.userId && decoded.email) {
+        // Generate a new token if we can decode the old one
+        const newToken = generateToken(decoded.userId, decoded.email);
+        res.json({ token: newToken });
+      } else {
+        res.status(401).json({ error: 'Invalid token' });
+      }
+    }
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(401).json({ error: 'Invalid token' });
   }
 });
 
