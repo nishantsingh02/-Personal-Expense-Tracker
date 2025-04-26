@@ -1,9 +1,12 @@
 import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { authMiddleware } from '../middleware/auth';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Apply authentication middleware to all routes
+router.use(authMiddleware);
 
 // Get transactions for the authenticated user
 router.get('/transactions', async (req: Request, res: Response): Promise<void> => {
