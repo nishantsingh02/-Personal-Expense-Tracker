@@ -16,8 +16,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token && config.headers) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
@@ -30,9 +30,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only redirect to login if it's a 401 error and we're not already on the login page
-    if (error.response && error.response.status === 401 && !window.location.pathname.includes('/signin')) {
-      // Don't clear localStorage here - we want to keep the token for refresh
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/signin';
     }
     return Promise.reject(error);

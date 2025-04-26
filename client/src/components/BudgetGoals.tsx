@@ -4,15 +4,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Transaction } from '../types';
 
 const Backend_url = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
-
-interface Transaction {
-  id: string;
-  category: string;
-  amount: number;
-  date: string;
-}
 
 export const BudgetGoals: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -33,11 +27,10 @@ export const BudgetGoals: React.FC = () => {
       abortControllerRef.current = new AbortController();
       
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${Backend_url}/transactions`, {
+      const response = await axios.get<Transaction[]>(`${Backend_url}/transactions`, {
         headers: {
           'Authorization': `Bearer ${token}`
-        },
-        signal: abortControllerRef.current.signal
+        }
       });
       
       // Ensure we're setting an array
@@ -46,7 +39,7 @@ export const BudgetGoals: React.FC = () => {
       setLoading(false);
     } catch (error) {
       // Only set error if it's not a cancellation
-      if (!axios.isCancel(error)) {
+      if (error instanceof Error) {
         console.error('Error fetching transactions:', error);
         setError('Failed to fetch transactions');
       }
@@ -59,12 +52,11 @@ export const BudgetGoals: React.FC = () => {
 
     // Listen for new transaction events
     const handleTransactionAdded = () => {
-      fetchTransactions(); // Fetch all transactions to ensure data consistency
+      fetchTransactions();
     };
 
     window.addEventListener('transactionAdded', handleTransactionAdded as EventListener);
 
-    // Cleanup function to cancel any ongoing requests and remove event listener
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -118,8 +110,8 @@ export const BudgetGoals: React.FC = () => {
     }
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (loading) return <div className="h-96 flex items-center justify-center">Loading...</div>;
+  if (error) return <div className="h-96 flex items-center justify-center text-red-500">{error}</div>;
 
   const { categoryTotals, totalSpent, percentageOfBudget } = calculateCategoryTotals();
 

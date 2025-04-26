@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '../utils/axios';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+import { User, AuthResponse } from '../types';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,7 +25,7 @@ const getInitialAuthState = () => {
       
       return {
         isAuthenticated: true,
-        user: JSON.parse(storedUser),
+        user: JSON.parse(storedUser) as User,
         token: storedToken
       };
     }
@@ -74,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (storedToken && storedUser) {
           console.log('Setting authentication state from localStorage');
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(JSON.parse(storedUser) as User);
           setIsAuthenticated(true);
           api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         } else {
@@ -89,28 +84,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
+  // Set up axios default header when token changes
+  useEffect(() => {
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common['Authorization'];
+    }
+  }, [token]);
+
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post<AuthResponse>('/auth/login', {
         email,
         password,
       });
-  
-      console.log('Login response:', response.data);
-  
-      const { token, user } = response.data;
-      setToken(token);
-      setUser(user);
+
+      const { token: newToken, user: newUser } = response.data;
+      
+      // Update state
+      setToken(newToken);
+      setUser(newUser);
       setIsAuthenticated(true);
       
       // Store in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
       
       // Set axios header
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      console.log('Authentication data stored in localStorage');
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     } catch (error) {
       console.error('Login error:', error);
       throw new Error('Login failed');
