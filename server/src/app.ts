@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import dotenv from "dotenv";
 import expenseRoutes from "./routes/expenseRoutes";
 import authRoutes from './routes/auth';
+import milestoneRoutes from './routes/milestoneRoutes'
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api", expenseRoutes);
+app.use("/api", milestoneRoutes);
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
