@@ -123,7 +123,7 @@ export const BudgetGoals: React.FC = () => {
     <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
       <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
   <div className="w-full max-w-full px-2 sm:px-4 md:px-6">
-    <CardTitle className="text-lg sm:text-xl md:text-2xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+    <CardTitle className="text-lg sm:text-xl md:text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
       Budget Overview
     </CardTitle>
     <CardDescription className="text-sm sm:text-base md:text-lg">
