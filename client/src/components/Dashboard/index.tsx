@@ -138,7 +138,7 @@ const Dashboard: React.FC = () => {
             <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl font-semibold">
-                  Premium Features
+                  Upcoming Features
                 </CardTitle>
                {/* <CardDescription className="text-indigo-100">
                   Unlock advanced insights
@@ -164,9 +164,11 @@ const Dashboard: React.FC = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-white text-indigo-600 hover:bg-indigo-50">
-                  Click Here To Know More !
-                </Button>
+                <a href="https://righteous-shape-20e.notion.site/Hi-User-1e34aff4282180b2ad58dd0d1bc6d63f">
+                  <Button className="w-full bg-white text-indigo-600 hover:bg-indigo-50">
+                    Click Here To Know More !
+                  </Button>
+                </a>
               </CardFooter>
             </Card>
           </div>

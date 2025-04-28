@@ -22,7 +22,7 @@ export default function DashboardHeader() {
               </div>
               <div className="ml-1">
                 <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-                  100xPayments
+                  100xPay
                 </span>
               </div>
             </div>
