@@ -33,12 +33,10 @@ export const BudgetGoals: React.FC = () => {
         }
       });
       
-      // Ensure we're setting an array
       const transactions = Array.isArray(response.data) ? response.data : [];
       setTransactions(transactions);
       setLoading(false);
     } catch (error) {
-      // Only set error if it's not a cancellation
       if (error instanceof Error) {
         console.error('Error fetching transactions:', error);
         setError('Failed to fetch transactions');
@@ -66,7 +64,7 @@ export const BudgetGoals: React.FC = () => {
   }, []);
 
   const calculateCategoryTotals = () => {
-    // Ensure transactions is an array
+   
     if (!Array.isArray(transactions)) {
       console.error('Expected transactions to be an array, got:', transactions);
       return {
@@ -110,44 +108,54 @@ export const BudgetGoals: React.FC = () => {
     }
   }, []);
 
-  if (loading) return <div className="h-96 flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   if (error) return <div className="h-96 flex items-center justify-center text-red-500">{error}</div>;
 
   const { categoryTotals, totalSpent, percentageOfBudget } = calculateCategoryTotals();
 
   return (
     <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div>
-          <CardTitle className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-            Budget Overview
-          </CardTitle>
-          <CardDescription>
-            Track your spending against budget
-          </CardDescription>
+      <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2">
+  <div className="w-full max-w-full px-2 sm:px-4 md:px-6">
+    <CardTitle className="text-lg sm:text-xl md:text-2xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+      Budget Overview
+    </CardTitle>
+    <CardDescription className="text-sm sm:text-base md:text-lg">
+      Track your spending against budget
+    </CardDescription>
+  </div>
+
+  <div className="flex items-center gap-2">
+    {isEditing ? (
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+        <div className="space-y-4 w-full sm:w-auto">
+          <Label htmlFor="budget">Monthly Budget</Label>
+          <Input
+            id="budget"
+            type="number"
+            value={budgetLimit}
+            onChange={(e) => setBudgetLimit(parseFloat(e.target.value))}
+            className="w-full sm:w-32"
+          />
         </div>
-        <div className="flex items-center gap-2">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <div className="space-y-1">
-                <Label htmlFor="budget">Monthly Budget</Label>
-                <Input
-                  id="budget"
-                  type="number"
-                  value={budgetLimit}
-                  onChange={(e) => setBudgetLimit(parseFloat(e.target.value))}
-                  className="w-32"
-                />
-              </div>
-              <Button onClick={handleSaveBudget}>Save</Button>
-            </div>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              Set Budget
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+        <Button onClick={handleSaveBudget} className="space-y-2 w-full sm:w-auto">
+          Save
+        </Button>
+      </div>
+    ) : (
+      <Button variant="outline" onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
+        Set Budget
+      </Button>
+    )}
+  </div>
+</CardHeader>
+
       <CardContent>
         <div className="space-y-6">
           {/* Overall Budget Progress */}

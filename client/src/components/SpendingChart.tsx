@@ -60,7 +60,13 @@ const SpendingChart: React.FC = () => {
     };
   }, []);
 
-  if (loading) return <div className="h-96 flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   if (error) return <div className="h-96 flex items-center justify-center text-red-500">{error}</div>;
   if (!transactions.length) return (
     <div className="h-96 flex flex-col items-center justify-center text-center p-6">
@@ -74,7 +80,6 @@ const SpendingChart: React.FC = () => {
     </div>
   );
 
-  // Update categoryColors to be more dynamic
   const categoryColors: Record<string, string> = {
     Food: "#FF6384",
     Transport: "#36A2EB",
@@ -84,18 +89,15 @@ const SpendingChart: React.FC = () => {
     Shopping: "#FF9F40",
     Healthcare: "#4BC0C0",
     Education: "#FF6384",
-    // Add more colors as needed
   };
 
-  // Get a color for any category (including unexpected ones)
   const getCategoryColor = (category: string) => {
     if (categoryColors[category]) return categoryColors[category];
-    // Generate a random color for unknown categories
+    // Generates a random color for unknown categories
     const colors = Object.values(categoryColors);
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  // First calculate all categories for the legend
   const allCategories = transactions.reduce((acc, transaction) => {
     if (!acc[transaction.category]) {
       acc[transaction.category] = 0;
@@ -104,10 +106,9 @@ const SpendingChart: React.FC = () => {
     return acc;
   }, {} as Record<string, number>);
 
-  // Calculate grand total (including hidden categories)
+  // Calculate grand total for all categories
   const grandTotal = Object.values(allCategories).reduce((a, b) => a + b, 0);
 
-  // Filter out hidden categories for pie chart
   const visibleCategories = Object.entries(allCategories)
     .filter(([category]) => !hiddenCategories.includes(category))
     .reduce((acc, [category, amount]) => {
@@ -115,10 +116,9 @@ const SpendingChart: React.FC = () => {
       return acc;
     }, {} as Record<string, number>);
 
-  // Calculate visible total for percentages
+
   const visibleTotal = Object.values(visibleCategories).reduce((a, b) => a + b, 0);
 
-  // Update the chart data preparation
   const chartData = {
     labels: Object.keys(visibleCategories),
     datasets: [{
@@ -138,7 +138,7 @@ const SpendingChart: React.FC = () => {
   return (
     <div className="flex flex-col h-full min-h-[700px] p-6">
       {/* Chart Section */}
-      <div className="relative h-[300px] w-full flex items-center justify-center mb-8">
+      <div className="relative h-[160px] w-full flex items-center justify-center mb-6">
         <Pie
           data={chartData}
           options={{
@@ -171,49 +171,51 @@ const SpendingChart: React.FC = () => {
         />
       </div>
 
-      {/* Legend Section - Vertical layout */}
-      <div className="space-y-2">
-        {Object.entries(allCategories).map(([category, amount]) => {
-          const isHidden = hiddenCategories.includes(category);
-          const color = getCategoryColor(category);
-          const percentage = ((amount / grandTotal) * 100).toFixed(1);
+      <div className="space-y-4 w-full max-w-full px-2 sm:px-4">
+  {Object.entries(allCategories).map(([category, amount]) => {
+    const isHidden = hiddenCategories.includes(category);
+    const color = getCategoryColor(category);
+    const percentage = ((amount / grandTotal) * 100).toFixed(1);
 
-          return (
-            <div 
-              key={category}
-              onClick={() => toggleCategory(category)}
-              className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200
-                ${isHidden ? 'opacity-50 bg-gray-50/50' : 'hover:bg-gray-50/80'} 
-                border border-gray-100 shadow-sm hover:shadow-md w-full`}
-            >
-              {/* Dot indicator */}
-              <div 
-                className={`w-4 h-4 rounded-full flex-shrink-0 transition-transform duration-200
-                  ${isHidden ? 'scale-75' : 'scale-100'} mr-4`}
-                style={{ backgroundColor: color }}
-              />
+    return (
+      <div 
+        key={category}
+        onClick={() => toggleCategory(category)}
+        className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200
+          ${isHidden ? 'opacity-50 bg-gray-50/50' : 'hover:bg-gray-100/80 dark:hover:bg-gray-800/80'}
+          border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md w-full gap-2 sm:gap-4`}
+      >
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Dot */}
+          <div 
+            className="w-4 h-4 rounded-full flex-shrink-0"
+            style={{ backgroundColor: color }}
+          />
 
-              {/* Category info */}
-              <div className="flex justify-between items-center w-full">
-                <div className="flex flex-col">
-                  <span className={`text-sm font-medium text-gray-700
-                    ${isHidden ? 'line-through decoration-gray-400' : ''}`}>
-                    {category}
-                  </span>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {percentage}%
-                  </div>
-                </div>
-                <span className={`text-sm font-semibold text-gray-700 whitespace-nowrap ml-4
-                  ${isHidden ? 'line-through decoration-gray-400' : ''}`}>
-                  ${amount.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+          {/* Text Info */}
+          <div className="flex flex-col w-full sm:w-auto">
+            <span className={`text-sm sm:text-base font-medium text-gray-800 dark:text-gray-100 break-words
+              ${isHidden ? 'line-through decoration-gray-400' : ''}`}>
+              {category}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {percentage}%
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Amount */}
+        <div className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 text-right w-full sm:w-auto">
+          <span className={`${isHidden ? 'line-through decoration-gray-400' : ''}`}>
+            ${amount.toLocaleString()}
+          </span>
+        </div>
       </div>
-    </div>
+    );
+  })}
+</div>
+</div>
+
   );
 };
 

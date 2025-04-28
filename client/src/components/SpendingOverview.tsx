@@ -98,7 +98,13 @@ export const SpendingOverview: React.FC = () => {
     };
   }, [fetchTransactions]);
 
-  if (loading) return <div className="h-[300px] flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   if (error) return <div className="h-[300px] flex items-center justify-center text-red-500">{error}</div>;
   if (monthlyData.length === 0) return (
     <div className="h-[300px] flex flex-col items-center justify-center text-center p-6">
@@ -118,7 +124,7 @@ export const SpendingOverview: React.FC = () => {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="name" fontSize={8} />
             <YAxis />
             <Tooltip 
               formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}

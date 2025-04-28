@@ -3,7 +3,7 @@ import {
   /*ArrowUpRight,*/
   MoreHorizontal,  
   PieChart,
-  ArrowUpRight
+  ArrowUpRight,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,17 @@ import { TransactionList } from "@/components/TransactionList";
 import SpendingOverview from "@/components/SpendingOverview";
 import  SpendingChart  from "@/components/SpendingChart";
 import { FinancialSummary } from "@/components/FinancialSummary";
-import { AccountCards } from "@/components/AccountCards";
-import { DashboardHeader } from "@/components/DashboardHeader";
+import { MilestoneCards } from "@/components/MilestoneCards";
+import  DashboardHeader  from "@/components/DashboardHeader";
 import { BudgetGoals } from "@/components/BudgetGoals";
 
 const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <DashboardHeader />
+        <div className="mb-8">
+         <DashboardHeader />
+        </div>
         
         {/* Financial Summary Cards */}
         <div className="mb-8">
@@ -28,44 +30,46 @@ const Dashboard: React.FC = () => {
         
         {/* Account Cards */}
         <div className="mb-8">
-          <AccountCards />
+          <MilestoneCards />
         </div>
         
         {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Spending Analytics */}
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
-                  <CardTitle className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                    Spending Overview
-                  </CardTitle>
-                  <CardDescription>
-                    Your monthly spending patterns
-                  </CardDescription>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Monthly
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <SpendingOverview />
-              </CardContent>
-              <CardFooter className="text-sm text-muted-foreground pt-0">
-                <div className="flex items-center space-x-1">
-                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
-                  <span>5% less than last month</span>
-                </div>
-              </CardFooter>
-            </Card>
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 px-4 md:px-6 py-6">
+  {/* Left Column - Spending Analytics */}
+  <div className="md:col-span-2 space-y-6">
+    <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg overflow-hidden">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 gap-4">
+        <div>
+          <CardTitle className="text-lg md:text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+            Spending Overview
+          </CardTitle>
+          <CardDescription className="text-sm">
+            Your monthly spending patterns
+          </CardDescription>
+        </div>
+        <div className="flex space-x-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" size="sm" className="text-xs">
+            Monthly
+          </Button>
+          <Button variant="ghost" size="sm" className="text-xs">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pb-2">
+        <div className="w-full h-full min-h-[300px]">
+          <SpendingOverview />
+        </div>
+      </CardContent>
+      <CardFooter className="text-xs sm:text-sm text-muted-foreground pt-0">
+        <div className="flex items-center space-x-1">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400"></span>
+          <span>5% less than last month</span>
+        </div>
+      </CardFooter>
+    </Card>
             
-            <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
+            {/*<Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
                   <CardTitle className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
@@ -79,27 +83,36 @@ const Dashboard: React.FC = () => {
               <CardContent>
                 <BudgetGoals />
               </CardContent>
-            </Card>
+            </Card>*/}
+
+            {/* Budget Goals */}
+            <BudgetGoals />
             
             {/* Transaction List moved below Budget Goals */}
             <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">Recent Transactions</CardTitle>
-                    <CardDescription>View your latest financial activities</CardDescription>
-                  </div>
-                  <div className="transaction-count text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                    Loading transactions...
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="p-0">
-                  <TransactionList />
-                </div>
-              </CardContent>
-            </Card>
+  <CardHeader>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <CardTitle className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+          Recent Transactions
+        </CardTitle>
+        <CardDescription className="text-sm sm:text-base">
+          View your latest financial activities
+        </CardDescription>
+      </div>
+      <div className="transaction-count text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
+        Loading transactions...
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div className="p-0">
+      <TransactionList />
+    </div>
+  </CardContent>
+</Card>
+
+            
           </div>
           
           {/* Right Column - Pie Chart */}
@@ -108,14 +121,14 @@ const Dashboard: React.FC = () => {
             <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
-                  <CardTitle className="text-xl font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                  <CardTitle className="text-md font-semibold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent sm:text-xl">
                     Spending by Category
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm mt-2">
                     How you're spending your money
                   </CardDescription>
                 </div>
-                <PieChart className="h-5 w-5 text-muted-foreground" />
+                <PieChart className="h-5 w-5 text-muted-foreground ml-4" />
               </CardHeader>
               <CardContent>
                 <SpendingChart />
