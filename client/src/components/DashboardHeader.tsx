@@ -17,10 +17,10 @@ export default function DashboardHeader() {
         <div className="w-full px-6">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center">
-              <div className="relative">
+              <div className="relative mr-6">
                 <img src={logo} className="w-40 h-20 object-contain" alt="100xPayments" />
               </div>
-              <div className="ml-1">
+              <div className="mr-12">
                 <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                   100xPay
                 </span>
@@ -112,8 +112,8 @@ export default function DashboardHeader() {
                   setIsMenuOpen(false);
                 }}
               >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Expense
+                <span className="text-sm text-slate-500 dark:text-slate-400">Add Expense</span>
+                <Plus className="ml-32 h-4 w-4" />
               </Button>
               <div className="px-4 py-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700">
                 <span className="text-sm text-slate-500 dark:text-slate-400">Toggle Theme</span>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background shape -->
+  <rect x="150" y="100" width="500" height="300" rx="40" fill="#f0f9ff" />
+  
+  <!-- Main logo elements -->
+  <g transform="translate(200, 250)">
+    <!-- The '100x' text -->
+    <text x="0" y="0" font-family="Arial, sans-serif" font-weight="700" font-size="90" fill="#0066cc">
+      <tspan>100</tspan><tspan fill="#00aaff">x</tspan>
+    </text>
+    
+    <!-- Growth arrow -->
+    <path d="M340,-40 L400,-40 L400,-80 L450,-30 L400,20 L400,-20 L340,-20 Z" fill="#00aaff" />
+    
+    <!-- Payment lines -->
+    <g stroke="#0066cc" stroke-width="8" stroke-linecap="round">
+      <line x1="0" y1="40" x2="300" y2="40" />
+      <line x1="40" y1="70" x2="340" y2="70" />
+      <line x1="80" y1="100" x2="380" y2="100" />
+    </g>
+  </g>
+  
+  <!-- Payment dots -->
+  <g fill="#0066cc">
+    <circle cx="500" cy="290" r="10" />
+    <circle cx="540" cy="320" r="10" />
+    <circle cx="580" cy="350" r="10" />
+  </g>
+  
+  <!-- Digital circuit pattern -->
+  <g stroke="#e0f0ff" stroke-width="3">
+    <path d="M150,200 L120,200 L120,300 L180,300" fill="none" />
+    <path d="M650,200 L680,200 L680,300 L620,300" fill="none" />
+    <path d="M200,100 L200,80 L400,80 L400,120" fill="none" />
+    <path d="M600,100 L600,80 L450,80" fill="none" />
+    <path d="M200,400 L200,420 L400,420 L400,380" fill="none" />
+    <path d="M600,400 L600,420 L450,420" fill="none" />
+  </g>
+  
+  <!-- Tagline -->
+  <text x="400" y="430" font-family="Arial, sans-serif" font-size="24" fill="#555555" text-anchor="middle">PAYMENTS</text>
+</svg>
