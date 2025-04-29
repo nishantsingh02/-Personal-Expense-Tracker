@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import expenseRoutes from "./routes/expenseRoutes";
 import authRoutes from './routes/auth';
 import milestoneRoutes from './routes/milestoneRoutes'
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -32,6 +33,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use("/api", expenseRoutes);
 app.use("/api", milestoneRoutes);
+
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Catch-all route for handling any other requests 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
