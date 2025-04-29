@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { AuthResponse } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import api from '@/utils/axios';
+import { Link } from 'react-router-dom';
 
 export const Signup: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post<AuthResponse>('/auth/register', { name, email, password });
+      const response = await api.post<AuthResponse>('/auth/register', { name, email, password });
 
       const { token, user } = response.data;
 
@@ -27,6 +30,10 @@ export const Signup: React.FC = () => {
       localStorage.setItem('user', JSON.stringify(user));
 
       toast.success('Account created successfully!');
+
+      // Automatically log in the user after sucessful signup
+      await login(email, password);
+
       navigate('/dashboard');
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to create account';
@@ -93,12 +100,12 @@ export const Signup: React.FC = () => {
         <CardFooter className="flex justify-center mt-2">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <a
-              href="/signin"
+            <Link
+              to="/signin"
               className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 transition-colors"
             >
               Sign in
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>
