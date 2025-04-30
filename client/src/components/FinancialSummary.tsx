@@ -183,7 +183,7 @@ export const FinancialSummary: React.FC = () => {
                 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
               }`}>
                 {currentBalance < initialBalance ? <ArrowDownRight className="h-4 w-4 mr-1" /> : <ArrowUpRight className="h-4 w-4 mr-1" />}
-                <span>{((currentBalance / initialBalance) * 100).toFixed(1)}%</span>
+                <span>{initialBalance === 0 ? '0.0' : ((currentBalance / initialBalance) * 100).toFixed(1)}%</span>
               </div>
             </div>
             <div className="w-full h-1 bg-slate-100 dark:bg-slate-700 rounded-full mt-2">

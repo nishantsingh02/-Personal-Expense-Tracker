@@ -106,14 +106,14 @@ export default function DashboardHeader() {
             <div className="space-y-1">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-left font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 rounded-md py-3"
+                className="w-full flex items-center justify-between text-left font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200 rounded-md py-3"
                 onClick={() => {
                   setIsModalOpen(true);
                   setIsMenuOpen(false);
                 }}
               >
                 <span className="text-sm text-slate-500 dark:text-slate-400">Add Expense</span>
-                <Plus className="ml-32 h-4 w-4" />
+                <Plus className="mr-3 h-4 w-4" />
               </Button>
               <div className="px-4 py-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700">
                 <span className="text-sm text-slate-500 dark:text-slate-400">Toggle Theme</span>
