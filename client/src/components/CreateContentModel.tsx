@@ -21,8 +21,11 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // To prevent double submission
+
 
   const addContent = async () => {
+    if (isSubmitting) return; // Prevent duplicate submissions
     const name = titleRef.current?.value;
     const amount = linkRef.current?.value;
     const date = selectedDate;
@@ -33,7 +36,19 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
       return;
     }
 
+     // Prevent future dates
+     const today = new Date();
+     today.setHours(0, 0, 0, 0);
+     const selected = new Date(date);
+     selected.setHours(0, 0, 0, 0);
+ 
+     if (selected > today) {
+       setError("Date cannot be in the future");
+       return;
+     }
+
     try {
+      setIsSubmitting(true); // Set submitting state to true
       const formattedDate = date.toISOString().split('T')[0];
       
       const response = await axios.post<Transaction>(`${Backend_url}/transactions`, {
@@ -72,6 +87,8 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     } catch (err) {
       const error = err instanceof Error ? err.message : "Failed to create expense. Please try again.";
       setError(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
