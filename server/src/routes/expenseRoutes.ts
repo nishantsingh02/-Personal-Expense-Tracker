@@ -56,6 +56,12 @@ router.post('/transactions', async (req: Request, res: Response) => {
        return;
     }
 
+     // Validates that name contains only letters
+     if (!/^[A-Za-z\s]+$/.test(name)) {
+      res.status(400).json({ error: 'Expense Name must contain only letters' });
+      return;
+    }
+
     const newTransaction = await prisma.expenses.create({
       data: {
         userId, // Link the transaction to the authenticated user
