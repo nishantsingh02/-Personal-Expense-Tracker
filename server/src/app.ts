@@ -41,12 +41,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Global error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Global error handler:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
 const prisma = new PrismaClient();
 
 (async () => {

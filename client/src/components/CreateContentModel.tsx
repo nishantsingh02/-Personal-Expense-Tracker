@@ -31,6 +31,12 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     const date = selectedDate;
     const category = selectedCategory;
 
+    // Validates that name contains only letters
+    if (!name || !/^[A-Za-z\s]+$/.test(name)) {
+      setError('Expense Name must contain only letters');
+      return;
+    }
+
     if (!name || !amount || !category || !date) {
       setError("All fields are required");
       return;
