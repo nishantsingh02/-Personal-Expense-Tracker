@@ -144,7 +144,7 @@ export const BudgetGoals: React.FC = () => {
             className="w-full sm:w-32"
           />
         </div>
-        <Button onClick={handleSaveBudget} className="space-y-2 w-full sm:w-auto">
+        <Button onClick={handleSaveBudget} className="mt-4 sm:mt-8 w-full sm:w-auto">
           Save
         </Button>
       </div>
@@ -164,7 +164,7 @@ export const BudgetGoals: React.FC = () => {
               <div className="flex justify-between text-sm">
                 <span>Total Budget Progress</span>
                 <span className="font-medium">
-                  ${totalSpent.toLocaleString()} / ${budgetLimit.toLocaleString()}
+                  ₹ {totalSpent.toLocaleString()} / ₹ {budgetLimit.toLocaleString()}
                 </span>
               </div>
               <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -186,7 +186,7 @@ export const BudgetGoals: React.FC = () => {
                 <div className="flex justify-between mb-1 text-sm">
                   <span className="font-medium">{category}</span>
                   <span className="font-medium">
-                    ${amount.toLocaleString()} ({percentage.toFixed(1)}%)
+                    ₹ {amount.toLocaleString()} ({percentage.toFixed(1)}%)
                   </span>
                 </div>
                 <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">

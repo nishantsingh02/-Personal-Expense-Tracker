@@ -170,10 +170,10 @@ export const FinancialSummary: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                     ${currentBalance.toLocaleString()}
+                     ₹ {currentBalance.toLocaleString()}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    Initial: ${initialBalance.toLocaleString()}
+                    Initial: ₹ {initialBalance.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -212,7 +212,7 @@ export const FinancialSummary: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                    ${totalSpending.toLocaleString()}
+                    ₹ {totalSpending.toLocaleString()}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {transactions.length} {transactions.length === 1 ? 'transaction' : 'transactions'}
@@ -254,7 +254,7 @@ export const FinancialSummary: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                    ${(currentBalance * 0.2).toLocaleString()}
+                    ₹ {(currentBalance * 0.2).toLocaleString()}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     20% of current balance

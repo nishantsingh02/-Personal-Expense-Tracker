@@ -119,25 +119,32 @@ export const SpendingOverview: React.FC = () => {
   );
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="p-6 rounded-lg shadow-md">
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData}>
+            <BarChart data={monthlyData} >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" fontSize={8} />
+            <XAxis 
+              dataKey="name" 
+              fontSize={10}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+              interval={0}
+            />
             <YAxis />
             <Tooltip 
-              formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+              formatter={(value: number) => [`₹ ${value.toLocaleString()}`, 'Amount']}
               labelFormatter={(label) => `Month: ${label}`}
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                textAlign: 'center'
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              textAlign: 'center'
               }}
             />
             <Bar dataKey="amount" fill="#8884d8" />
-          </BarChart>
+            </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

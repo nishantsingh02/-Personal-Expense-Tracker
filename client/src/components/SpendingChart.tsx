@@ -207,7 +207,7 @@ const SpendingChart: React.FC = () => {
         {/* Right: Amount */}
         <div className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 text-right w-full sm:w-auto">
           <span className={`${isHidden ? 'line-through decoration-gray-400' : ''}`}>
-            ${amount.toLocaleString()}
+            ₹ {amount.toLocaleString()}
           </span>
         </div>
       </div>
