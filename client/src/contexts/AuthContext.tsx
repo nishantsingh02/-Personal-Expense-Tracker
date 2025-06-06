@@ -1,6 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import api from '../utils/axios';
-import { User, AuthResponse } from '../types';
+import api from '../utils/axios'; // your configured axios instance
+import { toast } from 'sonner';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface AuthResponse {
+  token: string;
+  user: User;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -8,6 +19,13 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+}
+
+// Type guard to check for Axios-like error object
+function isAxiosError(
+  error: unknown
+): error is { isAxiosError: boolean; response?: { status: number; data?: { error?: string } } } {
+  return typeof error === 'object' && error !== null && 'isAxiosError' in error;
 }
 
 // Initialize auth state from localStorage synchronously
@@ -84,46 +102,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
-  // Set up axios default header when token changes
-  useEffect(() => {
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common['Authorization'];
-    }
-  }, [token]);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post<AuthResponse>('/auth/login', {
-        email,
-        password,
-      });
+      const response = await api.post<AuthResponse>('/auth/login', { email, password });
 
       const { token: newToken, user: newUser } = response.data;
-      
-      // Update state
-      setToken(newToken);
-      setUser(newUser);
+
       setIsAuthenticated(true);
-      
-      // Store in localStorage
+      setUser(newUser);
+      setToken(newToken);
+
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
-      
-      // Set axios header
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw new Error('Login failed');
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast.error('Invalid credentials');
+        } else {
+          toast.error(`Login failed: ${error.response?.data?.error || 'Unexpected error'}`);
+        }
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+      throw error; // Optional: let the calling component handle this
     }
   };
-  
+
   const logout = () => {
-    console.log('Logging out user');
-    setToken(null);
-    setUser(null);
     setIsAuthenticated(false);
+    setUser(null);
+    setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];

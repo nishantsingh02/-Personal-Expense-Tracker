@@ -26,17 +26,4 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/signin';
-    }
-    return Promise.reject(error);
-  }
-);
-
 export default api; 
