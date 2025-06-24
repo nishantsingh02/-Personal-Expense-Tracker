@@ -2,10 +2,15 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+import { RequestHandler } from 'express';
 
 const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Google OAuth2 client (replace with your Google client ID)
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID');
 
 // Helper function to generate token with longer expiration
 const generateToken = (userId: number, email: string): string => {
@@ -145,5 +150,55 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 });
+
+// Google Sign-In
+const googleSignInHandler: RequestHandler = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      res.status(400).json({ error: 'No credential provided' });
+      return;
+    }
+
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+    });
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      res.status(400).json({ error: 'Invalid Google token' });
+      return;
+    }
+
+    // Find or create user
+    let user = await prisma.user.findUnique({ where: { email: payload.email } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          name: payload.name || payload.email.split('@')[0],
+          email: payload.email,
+          password: Math.random().toString(36).slice(-8), // Dummy password for Google users
+        },
+      });
+    }
+
+    // Generate JWT
+    const token = generateToken(user.id, user.email);
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({ error: 'Google authentication failed' });
+  }
+};
+
+router.post('/google', googleSignInHandler);
 
 export default router; 

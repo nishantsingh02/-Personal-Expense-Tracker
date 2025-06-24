@@ -64,6 +64,11 @@ router.post('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, fun
             res.status(401).json({ error: 'Unauthorized: User not authenticated' });
             return;
         }
+        // Validates that name contains only letters
+        if (!/^[A-Za-z\s]+$/.test(name)) {
+            res.status(400).json({ error: 'Expense Name must contain only letters' });
+            return;
+        }
         const newTransaction = yield prisma.expenses.create({
             data: {
                 userId, // Link the transaction to the authenticated user

@@ -36,10 +36,11 @@ app.use("/api", milestoneRoutes);
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Catch-all route for handling any other requests 
+// Catch-all route for handling any other requests
+/*
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+});*/
 
 const prisma = new PrismaClient();
 

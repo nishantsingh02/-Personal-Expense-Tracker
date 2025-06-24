@@ -18,26 +18,35 @@ const client_1 = require("@prisma/client");
 const dotenv_1 = __importDefault(require("dotenv"));
 const expenseRoutes_1 = __importDefault(require("./routes/expenseRoutes"));
 const auth_1 = __importDefault(require("./routes/auth"));
+const milestoneRoutes_1 = __importDefault(require("./routes/milestoneRoutes"));
+const path_1 = __importDefault(require("path"));
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const allowedOrigins = ["https://personal-expense-tracker-kohl.vercel.app", "http://localhost:3000", "http://localhost:5173"];
+const allowedOrigins = [
+    "https://personal-expense-tracker-kohl.vercel.app",
+    "https://personal-expense-tracker-xi.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173"
+];
 // Middleware
 app.use((0, cors_1.default)({
     origin: allowedOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express_1.default.json());
 // Routes
 app.use('/api/auth', auth_1.default);
 app.use("/api", expenseRoutes_1.default);
-// Global error handler
-app.use((err, req, res, next) => {
-    console.error('Global error handler:', err);
-    res.status(500).json({ error: 'Internal server error' });
-});
+app.use("/api", milestoneRoutes_1.default);
+app.use(express_1.default.static(path_1.default.join(__dirname, 'dist')));
+// Catch-all route for handling any other requests
+/*
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});*/
 const prisma = new client_1.PrismaClient();
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
