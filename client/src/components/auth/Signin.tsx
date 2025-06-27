@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion'; 
+import { motion } from 'framer-motion';
+import { GoogleLogin } from '@react-oauth/google';
 
 export const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +94,9 @@ export const SignIn: React.FC = () => {
                 )}
               </Button>
             </form>
+            <div className="my-2 flex items-center justify-center">
+             {/*  <span className="text-slate-400 text-xs">or</span> */}
+            </div>
           </CardContent>
           <CardFooter className="flex justify-center mt-2">
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -100,10 +105,35 @@ export const SignIn: React.FC = () => {
                 to="/signup"
                 className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline-offset-4 hover:underline"
               >
-                Sign up
+                Sign up 
               </Link>
+              <span className="text-muted-foreground text-sm">&nbsp;or</span> 
             </p>
           </CardFooter>
+          <div className="flex flex-col items-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                if (credentialResponse.credential) {
+                  setIsLoading(true);
+                  try {
+                    await loginWithGoogle(credentialResponse.credential);
+                    toast.success('Signed in with Google');
+                    navigate('/dashboard');
+                  } catch {
+                    toast.error('Google sign-in failed');
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }
+              }}
+              onError={() => toast.error('Google sign-in failed')}
+              width="300"
+              size="large"
+              /*theme="filled_black"*/
+              shape="pill"
+              text='continue_with'
+            />
+          </div>
         </Card>
       </motion.div>
     </div>

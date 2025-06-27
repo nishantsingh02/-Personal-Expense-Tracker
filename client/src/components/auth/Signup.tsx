@@ -9,6 +9,7 @@ import { AuthResponse } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/utils/axios';
 import { Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 
 export const Signup: React.FC = () => {
   const [name, setName] = useState('');
@@ -16,6 +17,7 @@ export const Signup: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,8 +108,32 @@ export const Signup: React.FC = () => {
             >
               Sign in
             </Link>
+            <span className="text-muted-foreground text-sm">&nbsp;or</span> 
           </p>
         </CardFooter>
+        <div className="flex flex-col items-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                if (credentialResponse.credential) {
+                  setIsLoading(true);
+                  try {
+                    await loginWithGoogle(credentialResponse.credential);
+                    toast.success('Signed in with Google');
+                    navigate('/dashboard');
+                  } catch {
+                    toast.error('Google sign-in failed');
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }
+              }}
+              onError={() => toast.error('Google sign-in failed')}
+              width="300"
+              size="large"
+              /*theme="filled_black"*/
+              shape="pill"
+            />
+          </div>
       </Card>
     </div>
   );

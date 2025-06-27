@@ -19,6 +19,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  loginWithGoogle: (googleCredential: string) => Promise<void>;
 }
 
 // Type guard to check for Axios-like error object
@@ -66,6 +67,7 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   login: async () => {},
   logout: () => {},
+  loginWithGoogle: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -131,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setIsAuthenticated(false);
     setUser(null);
     setToken(null);
@@ -139,8 +142,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     delete api.defaults.headers.common['Authorization'];
   };
 
+  const loginWithGoogle = async (googleCredential: string) => {
+    try {
+      const response = await api.post<AuthResponse>('/auth/google', { credential: googleCredential });
+      const { token: newToken, user: newUser } = response.data;
+      setIsAuthenticated(true);
+      setUser(newUser);
+      setToken(newToken);
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    } catch (error: unknown) {
+      toast.error('Google login failed');
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
