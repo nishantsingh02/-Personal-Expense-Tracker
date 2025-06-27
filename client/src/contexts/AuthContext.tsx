@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import api from '../utils/axios'; // your configured axios instance
+import api from '../utils/axios'; 
 import { toast } from 'sonner';
 
 export interface User {
@@ -128,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         toast.error('An unexpected error occurred');
       }
-      throw error; // Optional: let the calling component handle this
+      throw error; 
     }
   };
 

@@ -128,10 +128,11 @@ export const Signup: React.FC = () => {
                 }
               }}
               onError={() => toast.error('Google sign-in failed')}
-              width="300"
+              width="250px"
               size="large"
               /*theme="filled_black"*/
               shape="pill"
+              text='continue_with'
             />
           </div>
       </Card>

@@ -94,9 +94,6 @@ export const SignIn: React.FC = () => {
                 )}
               </Button>
             </form>
-            <div className="my-2 flex items-center justify-center">
-             {/*  <span className="text-slate-400 text-xs">or</span> */}
-            </div>
           </CardContent>
           <CardFooter className="flex justify-center mt-2">
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -127,7 +124,7 @@ export const SignIn: React.FC = () => {
                 }
               }}
               onError={() => toast.error('Google sign-in failed')}
-              width="300"
+              width="250px"
               size="large"
               /*theme="filled_black"*/
               shape="pill"
