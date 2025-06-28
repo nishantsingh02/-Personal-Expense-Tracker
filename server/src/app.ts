@@ -16,7 +16,7 @@ const allowedOrigins = [
   "https://personal-expense-tracker-xi.vercel.app",
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://100xpay.vercel.app/"
+  "https://100xpay.vercel.app"
 ];
 
 // Middleware
