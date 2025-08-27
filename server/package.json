@@ -1,26 +1,8 @@
 {
-  "name": "pocketguard-server",
+  "name": "personal-expense-tracker-server",
   "version": "1.0.0",
-  "description": "Backend for PocketGuard - A comprehensive personal finance management API",
-  "private": true,
-  "type": "module",
-  "author": "Your Name",
-  "license": "MIT",
-  "keywords": [
-    "nodejs",
-    "express",
-    "typescript",
-    "prisma",
-    "postgresql",
-    "finance",
-    "budget",
-    "personal-finance",
-    "pocketguard"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nishantsingh02/PocketGuard.git"
-  },
+  "description": "Backend for  Personal-Expense-tracker",
+  "main": "src/app.ts",
   "scripts": {
     "build": "tsc -b",
     "start": "npm run build && node dist/app.js",
