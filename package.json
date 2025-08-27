@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "PocketGuard - A comprehensive personal finance management application",
   "private": true,
-  "author": "Your Name",
+  "author": "Nishant Singh",
   "license": "MIT",
   "keywords": [
     "finance",
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/PocketGuard.git"
+    "url": "https://github.com/nishantsingh02/-Personal-Expense-Tracker.git"
   },
   "scripts": {
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
