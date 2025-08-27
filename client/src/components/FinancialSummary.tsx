@@ -13,6 +13,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import api from "@/utils/axios";
+import { motion } from "framer-motion";
 
 interface Transaction {
   id: number;
@@ -21,6 +22,11 @@ interface Transaction {
   date: string;
   amount: number;
 }
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export const FinancialSummary: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -63,8 +69,9 @@ export const FinancialSummary: React.FC = () => {
     // Initial fetch
     fetchTransactions();
     
-    // Set up polling to check for new transactions every 30 seconds
-    const intervalId = setInterval(fetchTransactions, 30000);
+    // Set up polling to check for new transactions
+    const pollingInterval = import.meta.env.VITE_POLLING_INTERVAL || 30000;
+    const intervalId = setInterval(fetchTransactions, parseInt(pollingInterval.toString()));
     
     // Cleanup function
     return () => {
@@ -110,14 +117,14 @@ export const FinancialSummary: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Financial Summary Header */}
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-          Financial Overview
+      <motion.div className="mb-6" variants={cardVariants}>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-700 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">
+          PocketGuard Financial Overview
         </h2>
         <p className="text-sm text-muted-foreground">
-          Your financial summary at a glance
+          Your comprehensive financial summary at a glance
         </p>
-      </div>
+      </motion.div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <Card className="border-none shadow-lg dark:shadow-slate-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg overflow-hidden">

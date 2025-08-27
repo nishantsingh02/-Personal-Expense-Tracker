@@ -30,6 +30,16 @@ app.use(
 );
 app.use(express.json());
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    database: isDatabaseConnected() ? 'Connected' : 'Not connected'
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api", expenseRoutes);
@@ -43,17 +53,29 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });*/
 
-const prisma = new PrismaClient();
+let prisma: PrismaClient;
 
-(async () => {
+// Initialize Prisma client without blocking server startup
+const initializePrisma = async () => {
   try {
+    prisma = new PrismaClient();
     await prisma.$connect();
-    console.log("Database connected successfully!");
+    console.log("✅ Database connected successfully!");
+    return true;
   } catch (error) {
-    console.error("Failed to connect to the database:", error);
-    process.exit(1); // Exits the process if the database connection fails
+    console.error("❌ Failed to connect to the database:", error);
+    console.log("⚠️  Server will continue running without database connection");
+    console.log("⚠️  Some features may not work until database is available");
+    return false;
   }
-})();
+};
+
+// Initialize database connection in background
+initializePrisma();
+
+// Export prisma instance and database status check
+export const getPrisma = () => prisma;
+export const isDatabaseConnected = () => prisma && prisma.$connect !== undefined;
 
 const PORT = process.env.PORT || 5000;
 

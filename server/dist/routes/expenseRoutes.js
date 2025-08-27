@@ -1,34 +1,25 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const client_1 = require("@prisma/client");
-const auth_1 = require("../middleware/auth");
-const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
+import express from 'express';
+import { authMiddleware } from '../middleware/auth';
+import { getPrisma, isDatabaseConnected } from '../app';
+const router = express.Router();
 // Middleware to authenticate token for all routes
-router.use(auth_1.authMiddleware);
+router.use(authMiddleware);
 // Get transactions for the authenticated user
-router.get('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+router.get('/transactions', async (req, res) => {
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
+        const userId = req.user?.userId;
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
-        const transactions = yield prisma.expenses.findMany({
+        // Check if database is connected
+        if (!isDatabaseConnected()) {
+            console.log('Database not available, returning empty transactions');
+            res.status(200).json([]);
+            return;
+        }
+        const prisma = getPrisma();
+        const transactions = await prisma.expenses.findMany({
             where: { userId },
             orderBy: { date: 'desc' },
             select: {
@@ -40,7 +31,7 @@ router.get('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, func
             }
         });
         // Transform the data to match frontend expectations
-        const transformedTransactions = transactions.map(t => ({
+        const transformedTransactions = transactions.map((t) => ({
             id: t.id.toString(),
             description: t.name,
             amount: t.amount,
@@ -53,12 +44,11 @@ router.get('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, func
         console.error('Error fetching transactions:', error);
         res.status(500).json({ error: 'Failed to fetch transactions' });
     }
-}));
+});
 // Add a new transaction for the authenticated user
-router.post('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+router.post('/transactions', async (req, res) => {
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId; // Extract userId from authenticated request
+        const userId = req.user?.userId; // Extract userId from authenticated request
         const { name, amount, date, category } = req.body; // Get the expense details from the request body
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized: User not authenticated' });
@@ -69,7 +59,13 @@ router.post('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, fun
             res.status(400).json({ error: 'Expense Name must contain only letters' });
             return;
         }
-        const newTransaction = yield prisma.expenses.create({
+        // Check if database is connected
+        if (!isDatabaseConnected()) {
+            res.status(503).json({ error: 'Database not available' });
+            return;
+        }
+        const prisma = getPrisma();
+        const newTransaction = await prisma.expenses.create({
             data: {
                 userId, // Link the transaction to the authenticated user
                 name,
@@ -85,24 +81,30 @@ router.post('/transactions', (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.status(500).json({ error: 'Failed to create transaction' });
         return;
     }
-}));
+});
 // Delete a transaction for the authenticated user
-router.delete('/transactions/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+router.delete('/transactions/:id', async (req, res) => {
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId; // Extract userId from authenticated request
+        const userId = req.user?.userId; // Extract userId from authenticated request
         const expenseId = parseInt(req.params.id); // Get the expense ID from the URL parameter
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized: User not authenticated' });
             return;
         }
-        const expense = yield prisma.expenses.findFirst({
+        // Check if database is connected
+        if (!isDatabaseConnected()) {
+            res.status(503).json({ error: 'Database not available' });
+            return;
+        }
+        const prisma = getPrisma();
+        const expense = await prisma.expenses.findFirst({
             where: { id: expenseId, userId }, // Ensure the expense belongs to the authenticated user
         });
         if (!expense) {
             res.status(404).json({ error: 'Expense not found' });
+            return;
         }
-        yield prisma.expenses.delete({ where: { id: expenseId } }); // Delete the expense
+        await prisma.expenses.delete({ where: { id: expenseId } }); // Delete the expense
         res.status(200).json({ message: 'Expense deleted successfully' });
         return;
     }
@@ -111,5 +113,5 @@ router.delete('/transactions/:id', (req, res) => __awaiter(void 0, void 0, void 
         res.status(500).json({ error: 'Failed to delete transaction' });
         return;
     }
-}));
-exports.default = router;
+});
+export default router;

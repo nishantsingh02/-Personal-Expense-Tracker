@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Plus, CheckCircle, Edit, Trash2, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, CheckCircle, Edit, Trash2, ChevronRight, Target, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
 import { getMilestones, createMilestone, markAsCompleted, deleteMilestone, editMilestone } from "../config/milestoneApi";
@@ -101,191 +102,344 @@ export const MilestoneCards: React.FC = () => {
     setEditingId(null);
   };
 
-  const loadMore = () => {
-    setVisibleCount((prev) => prev + 3);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
   };
 
-  const visibleMilestones = milestones.slice(0, visibleCount);
-  const hasMoreToShow = milestones.length > visibleCount;
-
-  // Generate color based on milestone index
-  const getMilestoneColor = (index: number) => {
-    const colors = [
-      "from-green-500 to-teal-500",
-      "from-blue-500 to-indigo-500",
-      "from-purple-500 to-pink-500",
-      "from-red-500 to-orange-500",
-      "from-yellow-500 to-amber-500",
-      "from-cyan-500 to-sky-500"
-    ];
-    return colors[index % colors.length];
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    },
+    hover: {
+      y: -8,
+      scale: 1.02,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut"
+      }
+    },
+    tap: {
+      scale: 0.98
+    }
   };
+
+  const formVariants = {
+    hidden: { opacity: 0, height: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      height: "auto",
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      height: 0,
+      scale: 0.95,
+      transition: {
+        duration: 0.3,
+        ease: "easeIn"
+      }
+    }
+  };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold bg-gradient-to-r from-green-700 to-emerald-500 dark:from-white dark:to-green-300 bg-clip-text text-transparent">
-          Your Milestones
+    <motion.div
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header */}
+      <motion.div className="flex items-center justify-between" variants={cardVariants}>
+        <div className="flex items-center space-x-3">
+          <motion.div
+            className="h-10 w-10 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-full flex items-center justify-center"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Target className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          </motion.div>
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-purple-800 to-pink-700 dark:from-white dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent">
+              Milestones & Goals
         </h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-xs rounded-lg border-green-500 hover:bg-green-50 dark:hover:bg-green-900 transition-all duration-300"
-          onClick={() => {
-            setEditingId(null);
-            setTask("");
-            setReward("");
-            setShowForm(true);
-          }}
+            <p className="text-sm text-muted-foreground">
+              Track your progress and celebrate achievements
+            </p>
+          </div>
+        </div>
+        
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <Plus className="h-3.5 w-3.5 mr-1.5" />
+          <Button
+            onClick={() => setShowForm(true)}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Plus className="h-4 w-4 mr-2" />
           Add Milestone
         </Button>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Add/Edit Milestone Form */}
+      {/* Add/Edit Form */}
+      <AnimatePresence>
       {showForm && (
-        <div className="mb-6 p-4 rounded-xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-gray-800 shadow-md transition-all duration-300 ease-in-out">
-          <h3 className="text-base font-semibold mb-3 text-green-800 dark:text-green-300">
-            {editingId ? "Edit Milestone" : "Create New Milestone"}
-          </h3>
-          <div className="flex flex-col gap-3">
+          <motion.div
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl p-6 shadow-xl border border-purple-100 dark:border-purple-800"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Task
               </label>
               <input
                 type="text"
-                placeholder="What do you want to achieve?"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ease-in-out duration-300 placeholder:text-gray-400 text-sm"
+                  placeholder="What do you want to achieve?"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Reward
               </label>
               <input
                 type="text"
-                placeholder="What's your reward for completing this?"
                 value={reward}
                 onChange={(e) => setReward(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ease-in-out duration-300 placeholder:text-gray-400 text-sm"
+                  placeholder="What's your reward?"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all duration-200"
               />
+              </div>
             </div>
-            <div className="flex gap-2 mt-2">
-              <Button 
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium"
-                onClick={editingId !== null ? handleEdit : addMilestone}
+            <div className="flex space-x-3">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {editingId !== null ? "Update" : "Save"}
-              </Button>
               <Button 
-                size="sm" 
+                  onClick={editingId ? handleEdit : addMilestone}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                >
+                  {editingId ? 'Update' : 'Add'} Milestone
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+              <Button 
                 variant="outline" 
-                className="border-gray-300 dark:border-gray-600 text-xs font-medium"
                 onClick={handleCancel}
+                  className="hover:bg-gray-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </Button>
+              </motion.div>
             </div>
-          </div>
-        </div>
+          </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Milestones Grid */}
-      {milestones.length === 0 ? (
-        <div className="text-gray-500 dark:text-gray-400 text-center p-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
-          <p className="text-lg">No milestones yet. Add one to track your progress!</p>
-        </div>
-      ) : (
-        <div className="overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {visibleMilestones.map((milestone, index) => (
-              <div
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {milestones.slice(0, visibleCount).map((milestone, index) => (
+          <motion.div
                 key={milestone.id}
-                className={`rounded-xl h-auto p-5 flex flex-col justify-between ${
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+            custom={index}
+          >
+            <div className={`relative group cursor-pointer transition-all duration-300 ${
                   milestone.completed
-                    ? "bg-gradient-to-br from-gray-400 to-gray-600"
-                    : `bg-gradient-to-br ${getMilestoneColor(index)}`
-                } text-white shadow-lg transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden`}
-              >
-                <div className="absolute inset-0 bg-[url('/milestone-bg.svg')] opacity-10"></div>
-                
-                {/* Content Section */}
-                <div className="relative mb-4">
-                  <h3 className={`text-xl font-semibold mb-3 ${milestone.completed ? "line-through opacity-70" : ""}`}>
-                    {milestone.task}
-                  </h3>
-                  
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-white/80">Your reward:</p>
-                    <p className={`text-xl font-bold ${milestone.completed ? "line-through opacity-70" : ""}`}>
-                      {milestone.reward}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Footer Section */}
-                <div className="relative mt-auto border-t border-white/20 pt-3">
-                  <p className="text-xl font-medium text-white/80 mb-2.5">
-                    {isAuthenticated ? `${user?.name}'s Achievement` : "Your Achievement"}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {/* Complete button with text changed from "Complete" to "Completed" */}
-                    {!milestone.completed && (
-                      <Button
-                        size="sm"
-                        className="text-xs bg-white/20 hover:bg-white/30 text-white font-medium"
-                        onClick={() => handleMarkCompleted(milestone.id)}
-                      >
-                        <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                        Mark As Completed
-                      </Button>
-                    )}
-                    {milestone.completed && (
-                      <div className="flex items-center text-white text-xs font-bold py-1">
-                        <CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Completed
-                      </div>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-xs text-white bg-white/20 border-white/30 hover:bg-white/10 font-medium"
-                      onClick={() => startEdit(milestone)}
-                    >
-                      <Edit className="h-3.5 w-3.5 mr-1.5" /> Edit
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-xs text-white bg-white/20 border-white/30 hover:bg-white/10 font-medium"
-                      onClick={() => handleDelete(milestone.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete
-                    </Button>
-                  </div>
-                </div>
+                ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-emerald-200 dark:border-emerald-700' 
+                : 'bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 border-gray-200 dark:border-gray-700'
+            } border rounded-xl p-6 shadow-lg hover:shadow-xl backdrop-blur-xl`}>
+              
+              {/* Completion Status */}
+              <div className="absolute top-4 right-4">
+                {milestone.completed ? (
+                  <motion.div
+                    className="h-8 w-8 bg-emerald-500 rounded-full flex items-center justify-center text-white"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  >
+                    <CheckCircle className="h-5 w-5" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="h-8 w-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center"
+                    whileHover={{ scale: 1.1, backgroundColor: "#10b981" }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleMarkCompleted(milestone.id)}
+                  >
+                    <CheckCircle className="h-4 w-4 text-gray-400" />
+                  </motion.div>
+                )}
               </div>
+
+              {/* Content */}
+              <div className="mb-4">
+                <motion.h3 
+                  className={`text-lg font-semibold mb-2 ${
+                    milestone.completed 
+                      ? 'text-emerald-700 dark:text-emerald-300 line-through' 
+                      : 'text-gray-900 dark:text-white'
+                  }`}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                    {milestone.task}
+                </motion.h3>
+                <motion.p 
+                  className={`text-sm ${
+                    milestone.completed 
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  Reward: {milestone.reward}
+                </motion.p>
+                </div>
+                
+              {/* Actions */}
+                    {!milestone.completed && (
+                <div className="flex space-x-2">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      variant="outline"
+                      size="sm" 
+                      onClick={() => startEdit(milestone)}
+                      className="text-xs hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      variant="outline"
+                      size="sm" 
+                      onClick={() => handleDelete(milestone.id)}
+                      className="text-xs hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
+                    </Button>
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Completion Animation */}
+              {milestone.completed && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-teal-400/10 rounded-xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
+              )}
+              </div>
+          </motion.div>
             ))}
           </div>
           
-          {hasMoreToShow && (
-            <div className="mt-8 text-center">
+      {/* Show More Button */}
+      {milestones.length > visibleCount && (
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
               <Button 
                 variant="outline" 
-                className="rounded-full px-7 py-3 border-green-500 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-300 font-medium text-base"
-                onClick={loadMore}
+              onClick={() => setVisibleCount(prev => prev + 3)}
+              className="hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 transition-colors"
               >
-                View More <ChevronRight className="h-5 w-5 ml-1.5" />
+              Show More <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
-            </div>
-          )}
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+
+      {/* Empty State */}
+      {milestones.length === 0 && (
+        <motion.div
+          className="text-center py-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <motion.div
+            className="h-20 w-20 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-full flex items-center justify-center mx-auto mb-4"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Trophy className="h-10 w-10 text-purple-600 dark:text-purple-400" />
+          </motion.div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            No milestones yet
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Start by adding your first milestone to track your progress
+          </p>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Milestone
+            </Button>
+          </motion.div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };

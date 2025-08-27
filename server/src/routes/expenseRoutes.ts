@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { authMiddleware } from '../middleware/auth';
+import { getPrisma, isDatabaseConnected } from '../app';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Middleware to authenticate token for all routes
 router.use(authMiddleware as express.RequestHandler);
@@ -11,12 +10,20 @@ router.use(authMiddleware as express.RequestHandler);
 // Get transactions for the authenticated user
 router.get('/transactions', async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.userId;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
+    // Check if database is connected
+    if (!isDatabaseConnected()) {
+      console.log('Database not available, returning empty transactions');
+      res.status(200).json([]);
+      return;
+    }
+
+    const prisma = getPrisma();
     const transactions = await prisma.expenses.findMany({
       where: { userId },
       orderBy: { date: 'desc' },
@@ -30,7 +37,7 @@ router.get('/transactions', async (req: Request, res: Response): Promise<void> =
     });
 
     // Transform the data to match frontend expectations
-    const transformedTransactions = transactions.map(t => ({
+    const transformedTransactions = transactions.map((t: any) => ({
       id: t.id.toString(),
       description: t.name,
       amount: t.amount,
@@ -48,7 +55,7 @@ router.get('/transactions', async (req: Request, res: Response): Promise<void> =
 // Add a new transaction for the authenticated user
 router.post('/transactions', async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId; // Extract userId from authenticated request
+    const userId = (req as any).user?.userId; // Extract userId from authenticated request
     const { name, amount, date, category } = req.body; // Get the expense details from the request body
 
     if (!userId) {
@@ -62,6 +69,13 @@ router.post('/transactions', async (req: Request, res: Response) => {
       return;
     }
 
+    // Check if database is connected
+    if (!isDatabaseConnected()) {
+      res.status(503).json({ error: 'Database not available' });
+      return;
+    }
+
+    const prisma = getPrisma();
     const newTransaction = await prisma.expenses.create({
       data: {
         userId, // Link the transaction to the authenticated user
@@ -83,7 +97,7 @@ router.post('/transactions', async (req: Request, res: Response) => {
 // Delete a transaction for the authenticated user
 router.delete('/transactions/:id', async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.userId; // Extract userId from authenticated request
+    const userId = (req as any).user?.userId; // Extract userId from authenticated request
     const expenseId = parseInt(req.params.id); // Get the expense ID from the URL parameter
 
     if (!userId) {
@@ -91,12 +105,20 @@ router.delete('/transactions/:id', async (req: Request, res: Response) => {
       return;
     }
 
+    // Check if database is connected
+    if (!isDatabaseConnected()) {
+      res.status(503).json({ error: 'Database not available' });
+      return;
+    }
+
+    const prisma = getPrisma();
     const expense = await prisma.expenses.findFirst({
       where: { id: expenseId, userId }, // Ensure the expense belongs to the authenticated user
     });
 
     if (!expense) {
      res.status(404).json({ error: 'Expense not found' });
+     return;
     }
 
     await prisma.expenses.delete({ where: { id: expenseId } }); // Delete the expense

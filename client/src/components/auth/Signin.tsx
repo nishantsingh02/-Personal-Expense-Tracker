@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -36,6 +36,24 @@ export const SignIn: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300 dark:from-slate-900 dark:to-slate-800 px-4">
+      {/* Back to Landing Page Button */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="absolute top-6 left-6"
+      >
+        <Link to="/">
+          <Button
+            variant="ghost"
+            className="flex items-center space-x-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Home</span>
+          </Button>
+        </Link>
+      </motion.div>
+
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }} 
         animate={{ opacity: 1, scale: 1 }} 
@@ -43,16 +61,51 @@ export const SignIn: React.FC = () => {
         className="w-full max-w-md"
       >
         <Card className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl">
-          <CardHeader className="space-y-2">
-            <CardTitle className="text-3xl font-extrabold text-center bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-              Welcome Back
-            </CardTitle>
-            <CardDescription className="text-center text-slate-600 dark:text-slate-400">
-              Enter your credentials to access your account
-            </CardDescription>
+          <CardHeader className="space-y-4 text-center">
+            {/* PocketGuard Logo */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex justify-center"
+            >
+              <div className="h-16 w-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                PocketGuard
+              </h1>
+              <CardTitle className="text-2xl font-extrabold text-center bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent mt-2">
+                Welcome Back
+              </CardTitle>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <CardDescription className="text-center text-slate-600 dark:text-slate-400">
+                Sign in to access your financial dashboard
+              </CardDescription>
+            </motion.div>
           </CardHeader>
+          
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className="space-y-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            >
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-base">Email Address</Label>
                 <Input
@@ -81,7 +134,7 @@ export const SignIn: React.FC = () => {
               </div>
               <Button
                 type="submit"
-                className="w-full rounded-lg font-semibold py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-300"
+                className="w-full rounded-lg font-semibold py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-300"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -93,10 +146,16 @@ export const SignIn: React.FC = () => {
                   'Sign In'
                 )}
               </Button>
-            </form>
+            </motion.form>
           </CardContent>
+          
           <CardFooter className="flex justify-center mt-2">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <motion.p 
+              className="text-sm text-slate-600 dark:text-slate-400"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+            >
               Don't have an account?{' '}
               <Link
                 to="/signup"
@@ -105,9 +164,15 @@ export const SignIn: React.FC = () => {
                 Sign up 
               </Link>
               <span className="text-muted-foreground text-sm">&nbsp;or</span> 
-            </p>
+            </motion.p>
           </CardFooter>
-          <div className="flex flex-col items-center">
+          
+          <motion.div 
+            className="flex flex-col items-center pb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
             <GoogleLogin
               onSuccess={async (credentialResponse) => {
                 if (credentialResponse.credential) {
@@ -126,11 +191,10 @@ export const SignIn: React.FC = () => {
               onError={() => toast.error('Google sign-in failed')}
               width="250px"
               size="large"
-              /*theme="filled_black"*/
               shape="pill"
               text='continue_with'
             />
-          </div>
+          </motion.div>
         </Card>
       </motion.div>
     </div>
